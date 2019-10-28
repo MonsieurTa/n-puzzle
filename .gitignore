@@ -15,3 +15,5 @@
 # vendor/
 
 n-puzzle
+gen.py
+output
