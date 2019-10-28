@@ -9,3 +9,12 @@ func DeepCopy(arr [][]int) [][]int {
 	}
 	return new
 }
+
+func ContainsInt(arr []int, nbr int) bool {
+	for _, el := range arr {
+		if el == nbr {
+			return true
+		}
+	}
+	return false
+}
