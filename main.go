@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/MonsieurTa/npuzzle/parser"
+	"github.com/MonsieurTa/n-puzzle/parser"
 )
 
 func main() {

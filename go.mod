@@ -1,3 +1,3 @@
-module github.com/MonsieurTa/npuzzle
+module github.com/MonsieurTa/n-puzzle
 
 go 1.13
