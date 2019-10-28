@@ -53,8 +53,8 @@ func checkValidity(str string, size int, line int) ([]int, error) {
 	words := strings.Fields(str)
 	for i := 0; i < len(words); i++ {
 		nbr, err := strconv.Atoi(words[i])
-		if err != nil {
-			return nil, fmt.Errorf("n-puzzle: got %s while expected an integer", words[i])
+		if err != nil || nbr < 0 {
+			return nil, fmt.Errorf("n-puzzle: got %s while expected an unsigned integer on line %d", words[i], line+1)
 		}
 		if i >= size {
 			return nil, fmt.Errorf("n-puzzle: line %d has %d numbers instead of %d", line+1, len(words), size)
@@ -70,6 +70,9 @@ func checkValidity(str string, size int, line int) ([]int, error) {
 func validateTab(tab [][]int, size int) error {
 	maxNbr := (size * size) - 1
 	foundNbrs := make([]int, size*size)
+	for i := 0; i < size*size; i++ {
+		foundNbrs[i] = -1
+	}
 	for _, row := range tab {
 		for _, nbr := range row {
 			if nbr > maxNbr {
