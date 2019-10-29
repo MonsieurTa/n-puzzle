@@ -6,10 +6,12 @@ import (
 )
 
 var start = [][]int{
-	{6, 10, 2, 8},
-	{4, 5, 3, 9},
-	{1, 0, 12, 7},
-	{14, 15, 13, 11},
+	// {1, 8, 6},
+	// {2, 0, 7},
+	// {3, 4, 5},
+	{1, 2, 3},
+	{8, 6, 4},
+	{0, 7, 5},
 }
 
 func main() {
@@ -30,7 +32,7 @@ func main() {
 		Hash:  algo.HashState(board),
 		State: board,
 	}
-	// algo.DisplayState(&goal)
+	algo.DisplayState(&goal)
 	result := a.AStar(&root, &goal, func(a, b *algo.Node) int {
 		diff := 0
 		size := len(b.State)

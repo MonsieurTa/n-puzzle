@@ -20,8 +20,8 @@ type Node struct {
 
 type Algo struct {
 	CameFrom []*Node
-	GScore   map[*Node]int
-	FScore   map[*Node]int
+	GScore   map[string]int
+	FScore   map[string]int
 }
 
 func HashState(State [][]int) string {
@@ -30,7 +30,8 @@ func HashState(State [][]int) string {
 		base += fmt.Sprint(row)
 	}
 	hash := md5.Sum([]byte(base))
-	return hex.EncodeToString(hash[:])
+	res := hex.EncodeToString(hash[:])
+	return res
 }
 
 func getLowestCost(list []*Node, goal *Node, h func(*Node, *Node) int) (*Node, []*Node) {
@@ -84,7 +85,7 @@ func shiftTile(newX int, newY int, elem *Node, size int) *Node {
 	return cpy
 }
 
-func processNode(elem *Node) []*Node {
+func processNode(elem *Node, a *Algo) []*Node {
 	child := make([]*Node, 0)
 	size := len(elem.State)
 	shifts := []*Node{
@@ -96,6 +97,12 @@ func processNode(elem *Node) []*Node {
 	for _, item := range shifts {
 		if item != nil {
 			child = append(child, item)
+			if _, ok := a.GScore[item.Hash]; !ok {
+				a.GScore[item.Hash] = MaxInt
+			}
+			if _, ok := a.FScore[item.Hash]; !ok {
+				a.GScore[item.Hash] = MaxInt
+			}
 		}
 	}
 	return child
@@ -117,6 +124,8 @@ func reconstructPath(cameFrom []*Node, current *Node) []*Node {
 func (a *Algo) Init(size int) {
 	totalSize := size * size
 	a.CameFrom = make([]*Node, totalSize)
+	a.GScore = make(map[string]int)
+	a.FScore = make(map[string]int)
 }
 
 func DisplayState(a *Node) {
@@ -135,17 +144,11 @@ func ContainsHash(array []*Node, ref *Node) bool {
 	return false
 }
 
-func addMapEntry(item map[interface{}]interface{}, key *Node, value int) {
-	if item[key] == nil {
-		item[key] = map[*Node]int{}
-	}
-	item[key] = value
-}
-
 func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node {
 	openSet := []*Node{start}
 	closedSet := make([]*Node, 0)
-	a.GScore[start] = 0
+	a.GScore[start.Hash] = 0
+	a.FScore[start.Hash] = h(start, goal)
 	for len(openSet) > 0 {
 		elem, newOpenList := getLowestCost(openSet, goal, h)
 		openSet = newOpenList
@@ -153,16 +156,16 @@ func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node 
 			return reconstructPath(a.CameFrom, elem)
 		}
 		closedSet = append(closedSet, elem)
-		child := processNode(elem)
+		child := processNode(elem, a)
 		for _, children := range child {
 			if ContainsHash(closedSet, children) {
 				continue
 			}
-			currGScore := a.GScore[elem] + 1
-			if currGScore < a.GScore[children] {
+			currGScore := a.GScore[elem.Hash] + 1
+			if currGScore < a.GScore[children.Hash] {
 				a.CameFrom[children.ID] = elem
-				a.GScore[children] = currGScore
-				a.FScore[children] = a.GScore[children] + h(children, goal)
+				a.GScore[children.Hash] = currGScore
+				a.FScore[children.Hash] = a.GScore[children.Hash] + h(children, goal)
 				if !ContainsHash(openSet, children) {
 					openSet = append(openSet, children)
 				}
