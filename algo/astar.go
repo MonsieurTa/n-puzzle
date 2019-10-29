@@ -12,10 +12,10 @@ const MaxUint = ^uint(0)
 const MaxInt = int(MaxUint >> 1)
 
 type Node struct {
-	ID    int
-	X, Y  int
-	Hash  string
-	State [][]int
+	Parent *Node
+	X, Y   int
+	Hash   string
+	State  [][]int
 }
 
 type Algo struct {
@@ -75,7 +75,7 @@ func shiftTile(newX int, newY int, elem *Node, size int) *Node {
 		return nil
 	}
 	clone(elem, &cpy)
-	cpy.ID = elem.State[newY][newX]
+	cpy.Parent = nil
 	tmp := cpy.State[cpy.Y][cpy.X]
 	cpy.State[cpy.Y][cpy.X] = cpy.State[newY][newX]
 	cpy.State[newY][newX] = tmp
@@ -111,11 +111,8 @@ func processNode(elem *Node, a *Algo) []*Node {
 func reconstructPath(cameFrom []*Node, current *Node) []*Node {
 	node := current
 	totalPath := []*Node{node}
-	for {
-		node = cameFrom[node.ID]
-		if node == nil {
-			break
-		}
+	for node.Parent != nil {
+		node = node.Parent
 		totalPath = append([]*Node{node}, totalPath...)
 	}
 	return totalPath
@@ -155,6 +152,7 @@ func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node 
 		if elem.Hash == goal.Hash {
 			return reconstructPath(a.CameFrom, elem)
 		}
+		println("yolo")
 		closedSet = append(closedSet, elem)
 		child := processNode(elem, a)
 		for _, children := range child {
@@ -163,7 +161,7 @@ func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node 
 			}
 			currGScore := a.GScore[elem.Hash] + 1
 			if currGScore < a.GScore[children.Hash] {
-				a.CameFrom[children.ID] = elem
+				children.Parent = elem
 				a.GScore[children.Hash] = currGScore
 				a.FScore[children.Hash] = a.GScore[children.Hash] + h(children, goal)
 				if !ContainsHash(openSet, children) {

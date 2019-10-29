@@ -6,12 +6,12 @@ import (
 )
 
 var start = [][]int{
-	// {1, 8, 6},
-	// {2, 0, 7},
-	// {3, 4, 5},
-	{1, 2, 3},
-	{8, 6, 4},
-	{0, 7, 5},
+	{1, 8, 6},
+	{2, 0, 7},
+	{3, 4, 5},
+	// {1, 2, 3},
+	// {8, 6, 4},
+	// {0, 7, 5},
 }
 
 func main() {
@@ -20,15 +20,15 @@ func main() {
 	a.Init(len(board))
 	x, y := algo.GetRootPos(start)
 	root := algo.Node{
-		ID: start[y][x],
-		X:  x, Y: y,
+		Parent: nil,
+		X:      x, Y: y,
 		Hash:  algo.HashState(start),
 		State: start,
 	}
 	x, y = algo.GetRootPos(board)
 	goal := algo.Node{
-		ID: board[y][x],
-		X:  x, Y: y,
+		Parent: nil,
+		X:      x, Y: y,
 		Hash:  algo.HashState(board),
 		State: board,
 	}
