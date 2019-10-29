@@ -1,25 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"math"
+	"os"
 
 	"github.com/MonsieurTa/n-puzzle/algo"
+	"github.com/MonsieurTa/n-puzzle/parser"
 	"github.com/MonsieurTa/n-puzzle/utils"
 )
 
-var start = [][]int{
-	// {5, 4, 8},
-	// {6, 0, 7},
-	// {1, 3, 2},
-	// {0, 3, 4},
-	// {1, 6, 7},
-	// {8, 5, 2},
-	{1, 5, 2},
-	{6, 0, 3},
-	{7, 8, 4},
-}
-
 func main() {
+	start, err := parser.Parse()
+	if err != nil {
+		fmt.Fprint(os.Stderr, err, "\n")
+		return
+	}
+
 	var a algo.Algo
 	board := utils.SnailArray(len(start))
 	x, y := algo.GetRootPos(start)

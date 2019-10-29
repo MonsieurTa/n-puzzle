@@ -130,9 +130,8 @@ func (a *Algo) Init(size int, goal *Node) {
 
 func DisplayState(a *Node) {
 	for _, row := range a.State {
-		fmt.Printf("%v\n", row)
+		fmt.Printf("%v\n\n", row)
 	}
-	println()
 }
 
 func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node {
