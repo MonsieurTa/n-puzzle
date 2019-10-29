@@ -1,20 +1,5 @@
 const main = document.querySelector('#main')
-
-const current = [
-    [ 1,  2,  3,  4, 5],
-    [16, 17, 18, 19, 6],
-    [15, 24, 20, 0, 7],
-    [14, 23, 22, 21, 8],
-    [13, 12, 11, 10, 9]
-]
-
-const wanted = [
-    [ 1,  2,  3,  4, 5],
-    [16, 17, 18, 19, 6],
-    [15, 24,  0, 20, 7],
-    [14, 23, 22, 21, 8],
-    [13, 12, 11, 10, 9] 
-]
+let stepIndex = 0
 
 function setupGrid() {
     main.innerHTML = ''
@@ -53,7 +38,7 @@ function getNumberDiv(nbr) {
         })
     })
 
-    if (!row && !col) {
+    if (row == undefined && col == undefined) {
         return null
     }
 
@@ -195,12 +180,15 @@ function moveNumber(nbr, direction) {
         sideDiv.innerHTML = `<p>${nbr}</p>`
         moveNumberInGrid(nbr, direction)
         setupGrid()
+
+        // Launching next step
+        stepIndex++
+        if (stepIndex < steps.length) {
+            moveNumber(steps[stepIndex].nbr, steps[stepIndex].dir)
+        }
     }, 550)
 }
 
 setupGrid()
 
-setTimeout(() => moveNumber(20, 'right'), 1000)
-setTimeout(() => moveNumber(20, 'left'), 2000)
-setTimeout(() => moveNumber(21, 'up'), 3000)
-setTimeout(() => moveNumber(21, 'down'), 4000)
+setTimeout(() => moveNumber(steps[stepIndex].nbr, steps[stepIndex].dir), 1000)
