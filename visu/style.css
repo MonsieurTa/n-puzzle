@@ -1,0 +1,31 @@
+#main {
+    display: flex;
+    flex-direction: column;
+}
+
+.row {
+    display: flex;
+    flex-flow: row;
+}
+
+.row > div {
+    display: flex;
+    margin: 5px;
+    width: 100px;
+    height: 100px;
+    background-color: bisque;
+}
+
+.row > div > p {
+    text-align: center;
+    margin: auto;
+    font-family: Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.well-placed {
+    background-color: rgb(58, 163, 58) !important;
+}
+
+.empty {
+    background-color: white !important;
+}
