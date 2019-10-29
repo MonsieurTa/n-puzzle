@@ -72,4 +72,5 @@ func main() {
 	for _, node := range result {
 		algo.DisplayState(node)
 	}
+	algo.OutputToJson(result, goal.State)
 }

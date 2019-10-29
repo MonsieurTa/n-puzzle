@@ -7,7 +7,7 @@ import (
 )
 
 type step struct {
-	nbr int
+	nbr string
 	dir string
 }
 
@@ -31,10 +31,12 @@ func OutputToJson(nodes []*Node, goal [][]int) {
 	}
 	data += "\nconst steps = "
 
-	steps := make([]step, nodesLen)
+	steps := make([]map[string]interface{}, nodesLen)
 	for i := 0; i < nodesLen-1; i++ {
 		steps[i] = getStep(nodes[i], nodes[i+1])
 	}
+
+	// fmt.Print(steps)
 
 	stepsJson, err := json.Marshal(steps)
 	if err != nil {
@@ -55,7 +57,7 @@ func OutputToJson(nodes []*Node, goal [][]int) {
 	}
 }
 
-func getStep(node1 *Node, node2 *Node) step {
+func getStep(node1 *Node, node2 *Node) map[string]interface{} {
 	var len int = len(node1.State)
 	var nbr int = node2.State[node1.Y][node1.X]
 	var str string = "error"
@@ -70,5 +72,5 @@ func getStep(node1 *Node, node2 *Node) step {
 		str = "down"
 	}
 
-	return step{nbr, str}
+	return map[string]interface{}{"nbr": nbr, "dir": str}
 }
