@@ -36,18 +36,17 @@ func HashState(State [][]int) string {
 	return res
 }
 
-func getLowestCost(list []*Node, goal *Node, h func(*Node, *Node) int) (*Node, []*Node) {
-	index := 0
-	score := list[0].Heuristique
-	for i, item := range list[1:] {
+func getLowestCost(mapper map[string]*Node, goal *Node, h func(*Node, *Node) int) *Node {
+	var res *Node
+	score := MaxInt
+	for _, item := range mapper {
 		if item.Heuristique < score {
 			score = item.Heuristique
-			index = i
+			res = item
 		}
 	}
-	res := list[index]
-	list = append(list[:index], list[index+1:]...)
-	return res, list
+	delete(mapper, res.Hash)
+	return res
 }
 
 func GetRootPos(board [][]int) (int, int) {
@@ -136,30 +135,20 @@ func DisplayState(a *Node) {
 	println()
 }
 
-func ContainsHash(array []*Node, ref *Node) bool {
-	for _, elem := range array {
-		if elem.Hash == ref.Hash {
-			return true
-		}
-	}
-	return false
-}
-
 func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node {
-	openSet := []*Node{start}
-	closedSet := make([]*Node, 0)
+	openSet := map[string]*Node{start.Hash: start}
+	closedSet := map[string]*Node{}
 	a.GScore[start.Hash] = 0
 	a.FScore[start.Hash] = h(start, goal)
 	for len(openSet) > 0 {
-		elem, newOpenList := getLowestCost(openSet, goal, h)
-		openSet = newOpenList
+		elem := getLowestCost(openSet, goal, h)
 		if elem.Hash == goal.Hash {
 			return reconstructPath(a.CameFrom, elem)
 		}
-		closedSet = append(closedSet, elem)
+		closedSet[elem.Hash] = elem
 		child := processNode(elem, a, h)
 		for _, children := range child {
-			if ContainsHash(closedSet, children) {
+			if _, ok := closedSet[children.Hash]; ok {
 				continue
 			}
 			currGScore := a.GScore[elem.Hash] + 1
@@ -168,8 +157,8 @@ func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node 
 				a.GScore[children.Hash] = currGScore
 				// fmt.Printf("Heuristique: %d\n", h(children, goal))
 				a.FScore[children.Hash] = a.GScore[children.Hash] + children.Heuristique
-				if !ContainsHash(openSet, children) {
-					openSet = append(openSet, children)
+				if _, ok := openSet[children.Hash]; !ok {
+					openSet[children.Hash] = children
 				}
 			}
 		}
