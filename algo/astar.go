@@ -12,13 +12,15 @@ const MaxUint = ^uint(0)
 const MaxInt = int(MaxUint >> 1)
 
 type Node struct {
-	Parent *Node
-	X, Y   int
-	Hash   string
-	State  [][]int
+	Parent      *Node
+	X, Y        int
+	Hash        string
+	State       [][]int
+	Heuristique int
 }
 
 type Algo struct {
+	Goal     *Node
 	CameFrom []*Node
 	GScore   map[string]int
 	FScore   map[string]int
@@ -36,11 +38,10 @@ func HashState(State [][]int) string {
 
 func getLowestCost(list []*Node, goal *Node, h func(*Node, *Node) int) (*Node, []*Node) {
 	index := 0
-	score := h(list[index], goal)
+	score := list[0].Heuristique
 	for i, item := range list[1:] {
-		ret := h(item, goal)
-		if ret < score {
-			score = ret
+		if item.Heuristique < score {
+			score = item.Heuristique
 			index = i
 		}
 	}
@@ -85,7 +86,7 @@ func shiftTile(newX int, newY int, elem *Node, size int) *Node {
 	return cpy
 }
 
-func processNode(elem *Node, a *Algo) []*Node {
+func processNode(elem *Node, a *Algo, h func(*Node, *Node) int) []*Node {
 	child := make([]*Node, 0)
 	size := len(elem.State)
 	shifts := []*Node{
@@ -96,6 +97,7 @@ func processNode(elem *Node, a *Algo) []*Node {
 	}
 	for _, item := range shifts {
 		if item != nil {
+			item.Heuristique = h(item, a.Goal)
 			child = append(child, item)
 			if _, ok := a.GScore[item.Hash]; !ok {
 				a.GScore[item.Hash] = MaxInt
@@ -118,11 +120,12 @@ func reconstructPath(cameFrom []*Node, current *Node) []*Node {
 	return totalPath
 }
 
-func (a *Algo) Init(size int) {
+func (a *Algo) Init(size int, goal *Node) {
 	totalSize := size * size
 	a.CameFrom = make([]*Node, totalSize)
 	a.GScore = make(map[string]int)
 	a.FScore = make(map[string]int)
+	a.Goal = goal
 }
 
 func DisplayState(a *Node) {
@@ -152,9 +155,8 @@ func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node 
 		if elem.Hash == goal.Hash {
 			return reconstructPath(a.CameFrom, elem)
 		}
-		println("yolo")
 		closedSet = append(closedSet, elem)
-		child := processNode(elem, a)
+		child := processNode(elem, a, h)
 		for _, children := range child {
 			if ContainsHash(closedSet, children) {
 				continue
@@ -163,7 +165,8 @@ func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node 
 			if currGScore < a.GScore[children.Hash] {
 				children.Parent = elem
 				a.GScore[children.Hash] = currGScore
-				a.FScore[children.Hash] = a.GScore[children.Hash] + h(children, goal)
+				// fmt.Printf("Heuristique: %d\n", h(children, goal))
+				a.FScore[children.Hash] = a.GScore[children.Hash] + children.Heuristique
 				if !ContainsHash(openSet, children) {
 					openSet = append(openSet, children)
 				}
