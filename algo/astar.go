@@ -1,11 +1,11 @@
 package algo
 
 import (
-	"bytes"
 	"crypto/md5"
-	"encoding/gob"
 	"encoding/hex"
 	"fmt"
+
+	"github.com/MonsieurTa/n-puzzle/utils"
 )
 
 const MaxUint = ^uint(0)
@@ -61,16 +61,17 @@ func GetRootPos(board [][]int) (int, int) {
 	return -1, -1
 }
 
-func clone(a, b interface{}) {
-	buff := new(bytes.Buffer)
-	enc := gob.NewEncoder(buff)
-	dec := gob.NewDecoder(buff)
-	enc.Encode(a)
-	dec.Decode(b)
+func clone(a *Node, b *Node) {
+	b.Heuristique = a.Heuristique
+	b.Hash = a.Hash
+	b.Parent = a.Parent
+	b.State = utils.DeepCopy(a.State)
+	b.X = a.X
+	b.Y = a.Y
 }
 
 func shiftTile(newX int, newY int, elem *Node, size int) *Node {
-	var cpy *Node
+	var cpy Node = Node{}
 
 	if newX < 0 || newY < 0 || newX >= size || newY >= size {
 		return nil
@@ -83,7 +84,7 @@ func shiftTile(newX int, newY int, elem *Node, size int) *Node {
 	cpy.X = newX
 	cpy.Y = newY
 	cpy.Hash = HashState(cpy.State)
-	return cpy
+	return &cpy
 }
 
 func processNode(elem *Node, a *Algo, h func(*Node, *Node) int) []*Node {
