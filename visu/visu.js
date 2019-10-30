@@ -1,4 +1,5 @@
 const main = document.querySelector('#main')
+const maxSpeed = 10
 let stepIndex = 0
 let speed = 5
 
@@ -192,4 +193,12 @@ function moveNumber(nbr, direction) {
 
 setupGrid()
 
-setTimeout(() => moveNumber(steps[stepIndex].nbr, steps[stepIndex].dir), 1000)
+document.querySelector('#start').addEventListener('click', function(e) {
+    e.preventDefault()
+    this.parentElement.remove()
+    moveNumber(steps[stepIndex].nbr, steps[stepIndex].dir)
+})
+
+document.querySelector('#speed').addEventListener('change', function () {
+    speed = maxSpeed - parseInt(this.value) + 1
+})
