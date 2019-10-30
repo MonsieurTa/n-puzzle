@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/MonsieurTa/n-puzzle/gen"
+
 	"github.com/MonsieurTa/n-puzzle/algo"
 	"github.com/MonsieurTa/n-puzzle/parser"
 	"github.com/MonsieurTa/n-puzzle/utils"
@@ -36,11 +38,14 @@ func main() {
 		State: board,
 	}
 	a.Init(len(board), &goal)
-	algo.DisplayState(&goal)
-	result := a.AStar(&root, &goal, algo.ManhattanHeuristic)
-	println(len(result))
-	for _, node := range result {
-		algo.DisplayState(node)
+	if gen.IsSolvable(board) {
+		result := a.AStar(&root, &goal, algo.ManhattanHeuristic)
+		println(len(result))
+		for _, node := range result {
+			algo.DisplayState(node)
+		}
+		algo.OutputToJson(result, goal.State)
+	} else {
+		fmt.Print("Unsolvable !")
 	}
-	algo.OutputToJson(result, goal.State)
 }

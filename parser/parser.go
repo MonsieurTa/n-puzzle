@@ -51,6 +51,7 @@ func readLine(reader *bufio.Reader) (string, error) {
 	}
 	hashtagIndex := strings.IndexByte(str, '#')
 	if hashtagIndex >= 0 {
+		fmt.Print(str[hashtagIndex:])
 		str = str[:hashtagIndex]
 	}
 	str = strings.TrimSpace(str)
