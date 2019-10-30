@@ -27,6 +27,12 @@ type Algo struct {
 	FScore   map[string]int
 }
 
+type Return struct {
+	TimeComplex int
+	SizeComplex int
+	Nodes       []*Node
+}
+
 func HashState(State [][]int) string {
 	base := ""
 	for _, row := range State {
@@ -74,7 +80,7 @@ func shiftTile(newX int, newY int, elem *Node, size int) *Node {
 	return &cpy
 }
 
-func processNode(elem *Node, a *Algo, h func(*Node, *Node) int) []*Node {
+func processNode(elem *Node, a *Algo, h []func(*Node, *Node) int) []*Node {
 	child := make([]*Node, 0)
 	size := len(elem.State)
 	shifts := []*Node{
@@ -85,7 +91,7 @@ func processNode(elem *Node, a *Algo, h func(*Node, *Node) int) []*Node {
 	}
 	for _, item := range shifts {
 		if item != nil {
-			item.Heuristic = h(item, a.Goal)
+			item.Heuristic = applyHeuristics(item, a.Goal, h)
 			child = append(child, item)
 			if _, ok := a.GScore[item.Hash]; !ok {
 				a.GScore[item.Hash] = MaxInt
@@ -116,13 +122,6 @@ func (a *Algo) Init(size int, goal *Node) {
 	a.Goal = goal
 }
 
-func DisplayState(a *Node) {
-	for _, row := range a.State {
-		fmt.Printf("%v\n", row)
-	}
-	fmt.Print("\n")
-}
-
 func binarySearch(list []*Node, x int) int {
 	var ret int
 	low := 0
@@ -142,19 +141,33 @@ func binarySearch(list []*Node, x int) int {
 	return ret
 }
 
-func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node {
+func applyHeuristics(node1 *Node, node2 *Node, arr []func(*Node, *Node) int) int {
+	ret := 0
+	for _, h := range arr {
+		ret += h(node1, node2)
+	}
+	return ret
+}
+
+func (a *Algo) AStar(start *Node, goal *Node, h []func(*Node, *Node) int) Return {
 	var elem *Node
+	// Initializing return
+	var ret Return
+	ret.Nodes = nil
 
 	sortedNode := []*Node{start}
 	openSet := map[string]*Node{start.Hash: start}
 	closedSet := map[string]*Node{}
 	a.GScore[start.Hash] = 0
-	a.FScore[start.Hash] = h(start, goal)
+	a.FScore[start.Hash] = applyHeuristics(start, goal, h)
 	for len(openSet) > 0 {
 		elem, sortedNode = sortedNode[0], sortedNode[1:]
 		delete(openSet, elem.Hash)
 		if elem.Hash == goal.Hash {
-			return reconstructPath(a.CameFrom, elem)
+			ret.Nodes = reconstructPath(a.CameFrom, elem)
+			ret.TimeComplex = len(openSet) + len(closedSet)
+			ret.SizeComplex = len(closedSet)
+			return ret
 		}
 		closedSet[elem.Hash] = elem
 		child := processNode(elem, a, h)
@@ -175,5 +188,5 @@ func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node 
 			}
 		}
 	}
-	return nil
+	return ret
 }
