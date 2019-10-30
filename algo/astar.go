@@ -13,11 +13,11 @@ const MaxUint = ^uint(0)
 const MaxInt = int(MaxUint >> 1)
 
 type Node struct {
-	Parent      *Node
-	X, Y        int
-	Hash        string
-	State       [][]int
-	Heuristique int
+	Parent    *Node
+	X, Y      int
+	Hash      string
+	State     [][]int
+	Heuristic int
 }
 
 type Algo struct {
@@ -37,19 +37,6 @@ func HashState(State [][]int) string {
 	return res
 }
 
-func getLowestCost(mapper map[string]*Node, goal *Node, h func(*Node, *Node) int) *Node {
-	var res *Node
-	score := MaxInt
-	for _, item := range mapper {
-		if item.Heuristique < score {
-			score = item.Heuristique
-			res = item
-		}
-	}
-	delete(mapper, res.Hash)
-	return res
-}
-
 func GetRootPos(board [][]int) (int, int) {
 	for Y, row := range board {
 		for X, col := range row {
@@ -62,7 +49,7 @@ func GetRootPos(board [][]int) (int, int) {
 }
 
 func clone(a *Node, b *Node) {
-	b.Heuristique = a.Heuristique
+	b.Heuristic = a.Heuristic
 	b.Hash = a.Hash
 	b.Parent = a.Parent
 	b.State = utils.DeepCopy(a.State)
@@ -98,7 +85,7 @@ func processNode(elem *Node, a *Algo, h func(*Node, *Node) int) []*Node {
 	}
 	for _, item := range shifts {
 		if item != nil {
-			item.Heuristique = h(item, a.Goal)
+			item.Heuristic = h(item, a.Goal)
 			child = append(child, item)
 			if _, ok := a.GScore[item.Hash]; !ok {
 				a.GScore[item.Hash] = MaxInt
@@ -144,9 +131,9 @@ func binarySearch(list []*Node, x int) int {
 	for low <= high {
 		m := int(math.Floor(float64(low+high) / 2))
 		ret = m
-		if list[m].Heuristique < x {
+		if list[m].Heuristic < x {
 			low = m + 1
-		} else if list[m].Heuristique > x {
+		} else if list[m].Heuristic > x {
 			high = m - 1
 		} else {
 			return m
@@ -179,10 +166,10 @@ func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node 
 			if currGScore < a.GScore[children.Hash] {
 				children.Parent = elem
 				a.GScore[children.Hash] = currGScore
-				a.FScore[children.Hash] = a.GScore[children.Hash] + children.Heuristique
+				a.FScore[children.Hash] = a.GScore[children.Hash] + children.Heuristic
 				if _, ok := openSet[children.Hash]; !ok {
 					openSet[children.Hash] = children
-					i := binarySearch(sortedNode, children.Heuristique)
+					i := binarySearch(sortedNode, children.Heuristic)
 					sortedNode = append(sortedNode[:i], append([]*Node{children}, sortedNode[i:]...)...)
 				}
 			}

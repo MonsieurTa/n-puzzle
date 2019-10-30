@@ -1,5 +1,6 @@
 const main = document.querySelector('#main')
 let stepIndex = 0
+let speed = 5
 
 function setupGrid() {
     main.innerHTML = ''
@@ -127,7 +128,7 @@ function moveNumber(nbr, direction) {
                 nbrDiv.style.height = (height - incr) + 'px'
                 sideDiv.style.marginTop = (margin + height - incr > margin ? margin + height - incr : margin) + 'px'
                 sideDiv.style.height = (margin + incr < height ? margin + incr : height) + 'px'
-            }, 5)
+            }, speed)
             break
         case 'down':
             intervalId = setInterval(() => {
@@ -141,7 +142,7 @@ function moveNumber(nbr, direction) {
                 nbrDiv.style.height = (height - incr) + 'px'
                 sideDiv.style.marginBottom = (margin + height - incr > margin ? margin + height - incr : margin) + 'px'
                 sideDiv.style.height = (margin + incr < height ? margin + incr : height) + 'px'
-            }, 5)
+            }, speed)
             break
         case 'left':
             intervalId = setInterval(() => {
@@ -155,7 +156,7 @@ function moveNumber(nbr, direction) {
                 nbrDiv.style.width = (2 * margin + width - incr) + 'px'
                 sideDiv.style.marginLeft = (width - incr > margin ? width - incr : margin) + 'px'
                 sideDiv.style.width = (margin + incr < width ? margin + incr : width) + 'px'
-            }, 5)
+            }, speed)
             break
         case 'right':
             intervalId = setInterval(() => {
@@ -169,7 +170,7 @@ function moveNumber(nbr, direction) {
                 nbrDiv.style.width = (2 * margin + width - incr) + 'px'
                 sideDiv.style.marginRight = (width - incr > margin ? width - incr : margin) + 'px'
                 sideDiv.style.width = (margin + incr < width ? margin + incr : width) + 'px'
-            }, 5)
+            }, speed)
             break
     }
 
@@ -186,7 +187,7 @@ function moveNumber(nbr, direction) {
         if (stepIndex < steps.length) {
             moveNumber(steps[stepIndex].nbr, steps[stepIndex].dir)
         }
-    }, 550)
+    }, speed * 110)
 }
 
 setupGrid()

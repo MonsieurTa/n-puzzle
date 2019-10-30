@@ -14,6 +14,9 @@ type step struct {
 func OutputToJson(nodes []*Node, goal [][]int) {
 	var data string = "const current = "
 	nodesLen := len(nodes)
+	if nodesLen == 0 {
+		return
+	}
 	start, err := json.Marshal(nodes[0].State)
 	if err != nil {
 		fmt.Fprint(os.Stderr, "n-puzzle: error converting start to JSON data")

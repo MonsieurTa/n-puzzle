@@ -13,9 +13,9 @@ import (
 
 func Parse() ([][]int, error) {
 	reader := bufio.NewReader(os.Stdin)
-	sizeStr, err := reader.ReadString('\n')
+	sizeStr, err := readLine(reader)
 	if err != nil {
-		return nil, fmt.Errorf("n-puzzle: unexpected EOF in stdin")
+		return nil, err
 	}
 	sizeStr = strings.TrimSpace(sizeStr)
 	size, err := strconv.Atoi(sizeStr)
@@ -27,9 +27,9 @@ func Parse() ([][]int, error) {
 	}
 	tab := make([][]int, size)
 	for i := 0; i < size; i++ {
-		str, err := reader.ReadString('\n')
+		str, err := readLine(reader)
 		if err != nil {
-			return nil, fmt.Errorf("n-puzzle: unexpected EOF in stdin")
+			return nil, err
 		}
 		numbers, err := checkValidity(str, size, i)
 		if err != nil {
@@ -44,12 +44,24 @@ func Parse() ([][]int, error) {
 	return tab, nil
 }
 
-func checkValidity(str string, size int, line int) ([]int, error) {
-	numbers := make([]int, size)
-	var hashtagIndex int = strings.IndexByte(str, '#')
-	if hashtagIndex > 0 {
+func readLine(reader *bufio.Reader) (string, error) {
+	str, err := reader.ReadString('\n')
+	if err != nil {
+		return "", fmt.Errorf("n-puzzle: error getting data from stdin")
+	}
+	hashtagIndex := strings.IndexByte(str, '#')
+	if hashtagIndex >= 0 {
 		str = str[:hashtagIndex]
 	}
+	str = strings.TrimSpace(str)
+	if len(str) > 0 {
+		return str, nil
+	}
+	return readLine(reader)
+}
+
+func checkValidity(str string, size int, line int) ([]int, error) {
+	numbers := make([]int, size)
 	words := strings.Fields(str)
 	for i := 0; i < len(words); i++ {
 		nbr, err := strconv.Atoi(words[i])
