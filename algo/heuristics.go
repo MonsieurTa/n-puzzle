@@ -16,6 +16,18 @@ func DefaultHeuristic(a, b *Node) int {
 }
 
 func ManhattanHeuristic(a, b *Node) int {
+	return distanceHeuristic(a, b, func(x1, x2, y1, y2 int) int {
+		return int(math.Abs(float64(x1-x2)) + math.Abs(float64(y1-y2)))
+	})
+}
+
+func EuclidianHeuristic(a, b *Node) int {
+	return distanceHeuristic(a, b, func(x1, x2, y1, y2 int) int {
+		return int(math.Pow(float64(x1-x2), 2) + math.Pow(float64(y1-y2), 2))
+	})
+}
+
+func distanceHeuristic(a, b *Node, get func(int, int, int, int) int) int {
 	res := 0
 	size := len(b.State)
 	for i := 0; i < size; i++ {
@@ -35,7 +47,7 @@ func ManhattanHeuristic(a, b *Node) int {
 				}
 			}
 			if found {
-				res += int(math.Abs(float64(i-k)) + math.Abs(float64(j-l)))
+				res += get(i, k, j, l)
 			}
 		}
 	}
