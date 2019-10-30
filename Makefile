@@ -1,8 +1,8 @@
 NAME=n-puzzle
 
-$(NAME): all
+all: $(NAME)
 
-all:
+$(NAME):
 	go build
 
 re: fclean all
