@@ -54,13 +54,15 @@ func ParseArgs(data *Data) error {
 			return err
 		}
 	}
-
+	if len(data.Heuristic) == 0 {
+		data.Heuristic = append(data.Heuristic, algo.ManhattanHeuristic)
+	}
 	return nil
 }
 
 func getHeuristicNames() string {
 	ret := ""
-	for name, _ := range algo.Heuristics {
+	for name := range algo.Heuristics {
 		if len(ret) > 0 {
 			ret += ", "
 		}
@@ -70,7 +72,7 @@ func getHeuristicNames() string {
 }
 
 func initData(data *Data) {
-	data.Heuristic = []func(*algo.Node, *algo.Node) int{algo.ManhattanHeuristic}
+	data.Heuristic = []func(*algo.Node, *algo.Node) int{}
 	data.File = os.Stdin
 	data.Output = os.Stdout
 }
