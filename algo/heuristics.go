@@ -32,7 +32,7 @@ func distanceHeuristic(a, b *Node, get func(int, int, int, int) int) int {
 	size := len(b.State)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
-			var found bool = false
+			found := false
 			var k int
 			var l int
 			for k = 0; k < size; k++ {
