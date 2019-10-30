@@ -5,17 +5,18 @@ import (
 )
 
 var Heuristics map[string](func(*Node, *Node) int) = map[string](func(*Node, *Node) int){
-	"hamming":   DefaultHeuristic,
-	"manhattan": ManhattanHeuristic,
-	"euclidian": EuclidianHeuristic,
+	"hamming":   Hamming,
+	"manhattan": Manhattan,
+	"euclidian": Euclidian,
+	"conflicts": ManhattanXLinear,
 }
 
-func DefaultHeuristic(a, b *Node) int {
+func Hamming(a, b *Node) int {
 	res := 0
 	size := len(b.State)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
-			if a.State[i][j] != b.State[i][j] {
+			if a.State[i][j] != 0 && a.State[i][j] != b.State[i][j] {
 				res++
 			}
 		}
@@ -23,13 +24,13 @@ func DefaultHeuristic(a, b *Node) int {
 	return res
 }
 
-func ManhattanHeuristic(a, b *Node) int {
+func Manhattan(a, b *Node) int {
 	return distanceHeuristic(a, b, func(x1, x2, y1, y2 int) int {
 		return int(math.Abs(float64(x1-x2)) + math.Abs(float64(y1-y2)))
 	})
 }
 
-func EuclidianHeuristic(a, b *Node) int {
+func Euclidian(a, b *Node) int {
 	return distanceHeuristic(a, b, func(x1, x2, y1, y2 int) int {
 		return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
 	})
@@ -45,7 +46,7 @@ func distanceHeuristic(a, b *Node, get func(int, int, int, int) int) int {
 			var l int
 			for k = 0; k < size; k++ {
 				for l = 0; l < size; l++ {
-					if a.State[i][j] == b.State[k][l] {
+					if a.State[i][j] != 0 && a.State[i][j] == b.State[k][l] {
 						found = true
 						break
 					}
@@ -62,74 +63,83 @@ func distanceHeuristic(a, b *Node, get func(int, int, int, int) int) int {
 	return res
 }
 
-func conflicDir(value, x, y int, goal *Node) (int, string) {
-	for i := 0; i < len(goal.State); i++ {
-		if goal.State[y][i] == value && i != x {
-			return i, "row"
-		} else if goal.State[i][x] == value && i != y {
-			return i, "col"
+func isInGoalRow(value, row int, state [][]int, goal [][]int) (int, bool) {
+	for i := 0; i < len(goal); i++ {
+		if goal[row][i] == value {
+			return i, true
 		}
 	}
-	return -1, ""
+	return 0, false
 }
 
-func countColumnConflict(state [][]int, y, i int) int {
-	var idx int
-	offset := 1
-	ret := 0
-
-	if i > y {
-		offset = -1
-	}
-	idx = i + offset
-	for idx != y {
-		if state[y][idx] != 0 && state[y][i] < state[y][i] {
-			ret++
+func isInGoalColumn(value, col int, state [][]int, goal [][]int) (int, bool) {
+	for i := 0; i < len(goal); i++ {
+		if goal[i][col] == value {
+			return i, true
 		}
-		idx += offset
 	}
-	if state[y][idx] != 0 && state[y][i] < state[y][i] {
-		ret++
+	return 0, false
+}
+
+func searchRowConflict(x, xx, y int, state, goal [][]int) int {
+	inc := 1
+	value := state[y][x]
+	ret := 0
+	if x > xx {
+		inc = -1
+	} else if x == xx {
+		return 0
+	}
+	x += inc
+	for x != xx {
+		currValue := state[y][x]
+		if _, ok := isInGoalRow(currValue, y, state, goal); ok {
+			if currValue > value {
+				ret++
+			}
+		}
+		x += inc
 	}
 	return ret
 }
 
-func countRowConflict(state [][]int, x, i int) int {
-	var idx int
-	offset := 1
+func searchColumnConflict(y, yy, x int, state, goal [][]int) int {
+	inc := 1
+	value := state[y][x]
 	ret := 0
-
-	if i > x {
-		offset = -1
+	if y > yy {
+		inc = -1
 	}
-	idx = i + offset
-	for idx != x {
-		if state[idx][x] != 0 && state[i][x] < state[idx][x] {
-			ret++
+	y += inc
+	for y != yy {
+		currValue := state[y][x]
+		if _, ok := isInGoalColumn(currValue, x, state, goal); ok {
+			if currValue > value {
+				ret++
+			}
 		}
-		idx += offset
-	}
-	if state[idx][x] != 0 && state[i][x] < state[idx][x] {
-		ret++
+		y += inc
 	}
 	return ret
 }
 
 func LinearConflict(a, b *Node) int {
-	res := 0
+	ret := 0
 	for y := range a.State {
 		for x := range a.State[y] {
-			i, dir := conflicDir(a.State[y][x], x, y, b)
-			if dir == "row" {
-				res += countRowConflict(a.State, x, i)
-			} else if dir == "col" {
-				res += countColumnConflict(a.State, y, i)
+			value := a.State[y][x]
+			if value != 0 {
+				if xx, ok := isInGoalRow(value, y, a.State, b.State); ok {
+					ret += searchRowConflict(x, xx, y, a.State, b.State)
+				} else if yy, ok := isInGoalColumn(value, x, a.State, b.State); ok {
+					ret += searchColumnConflict(y, yy, x, a.State, b.State)
+				}
 			}
 		}
 	}
-	return res * 2
+	return ret * 2
 }
 
 func ManhattanXLinear(a, b *Node) int {
-	return LinearConflict(a, b) + ManhattanHeuristic(a, b)
+	return Manhattan(a, b) + LinearConflict(a, b)
 }

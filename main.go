@@ -36,16 +36,20 @@ func main() {
 		Hash:  algo.HashState(board),
 		State: board,
 	}
+	fmt.Printf("Initial heuristic scores:\n")
+	for key, value := range algo.Heuristics {
+		fmt.Printf("- %s: %d\n", key, value(&root, &goal))
+	}
 	a.Init(len(board), &goal)
 	if gen.IsSolvable(start) {
 		result := a.AStar(&root, &goal, npuzzle.Heuristic)
 		if result.Nodes != nil {
-			for _, node := range result.Nodes {
-				displayState(&npuzzle, node)
-			}
+			// for _, node := range result.Nodes {
+			// 	displayState(&npuzzle, node)
+			// }
 			algo.OutputToJson(result.Nodes, goal.State)
-			fmt.Fprintf(npuzzle.Output, "Time complexity: %d nodes in memory\n", result.TimeComplex)
-			fmt.Fprintf(npuzzle.Output, "Size complexity: %d nodes evaluated\n", result.SizeComplex)
+			fmt.Fprintf(npuzzle.Output, "Time complexity: %d nodes evaluated\n", result.TimeComplex)
+			fmt.Fprintf(npuzzle.Output, "Size complexity: %d nodes in memory\n", result.SizeComplex)
 			fmt.Fprintf(npuzzle.Output, "Moves required: %d\n", len(result.Nodes))
 			return
 		}

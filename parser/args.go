@@ -55,7 +55,7 @@ func ParseArgs(data *Data) error {
 		}
 	}
 	if len(data.Heuristic) == 0 {
-		data.Heuristic = append(data.Heuristic, algo.ManhattanHeuristic)
+		data.Heuristic = append(data.Heuristic, algo.Manhattan)
 	}
 	return nil
 }

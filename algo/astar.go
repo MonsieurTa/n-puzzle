@@ -138,6 +138,11 @@ func binarySearch(list []*Node, x int) int {
 			return m
 		}
 	}
+	if len(list) == 0 {
+		return 0
+	} else if list[ret].Heuristic > x && ret > 0 {
+		return ret - 1
+	}
 	return ret
 }
 
@@ -165,8 +170,8 @@ func (a *Algo) AStar(start *Node, goal *Node, h []func(*Node, *Node) int) Return
 		delete(openSet, elem.Hash)
 		if elem.Hash == goal.Hash {
 			ret.Nodes = reconstructPath(a.CameFrom, elem)
-			ret.TimeComplex = len(openSet) + len(closedSet)
-			ret.SizeComplex = len(closedSet)
+			ret.SizeComplex = len(openSet) + len(closedSet)
+			ret.TimeComplex = len(closedSet)
 			return ret
 		}
 		closedSet[elem.Hash] = elem
