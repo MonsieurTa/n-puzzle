@@ -9,9 +9,10 @@ import (
 )
 
 type Data struct {
-	Heuristic heuristicArray
-	File      *os.File
-	Output    *os.File
+	Heuristic  heuristicArray
+	File       *os.File
+	Output     *os.File
+	JsonOutput bool
 }
 
 type heuristicArray []func(*algo.Node, *algo.Node) int
@@ -38,6 +39,7 @@ func ParseArgs(data *Data) error {
 	flag.Var(&data.Heuristic, "heuristic", "an heuristic algorithm between "+getHeuristicNames())
 	flag.StringVar(&inputFile, "f", "", "a file to read in, stdin by default")
 	flag.StringVar(&outputFile, "o", "", "a file to output in, stdout by default")
+	flag.BoolVar(&data.JsonOutput, "json", false, "output or not to json file")
 	flag.Parse()
 
 	if len(inputFile) > 0 {

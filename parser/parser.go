@@ -46,7 +46,7 @@ func Parse(data *Data) ([][]int, error) {
 func readLine(reader *bufio.Reader) (string, error) {
 	str, err := reader.ReadString('\n')
 	if err != nil {
-		return "", fmt.Errorf("n-puzzle: error getting data from stdin")
+		return "", fmt.Errorf("n-puzzle: error reading data from input")
 	}
 	hashtagIndex := strings.IndexByte(str, '#')
 	if hashtagIndex >= 0 {
