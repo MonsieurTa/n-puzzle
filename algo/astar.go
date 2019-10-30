@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"math"
 
 	"github.com/MonsieurTa/n-puzzle/utils"
 )
@@ -135,13 +136,36 @@ func DisplayState(a *Node) {
 	fmt.Print("\n")
 }
 
+func binarySearch(list []*Node, x int) int {
+	var ret int
+	low := 0
+	high := len(list) - 1
+
+	for low <= high {
+		m := int(math.Floor(float64(low+high) / 2))
+		ret = m
+		if list[m].Heuristique < x {
+			low = m + 1
+		} else if list[m].Heuristique > x {
+			high = m - 1
+		} else {
+			return m
+		}
+	}
+	return ret
+}
+
 func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node {
+	var elem *Node
+
+	sortedNode := []*Node{start}
 	openSet := map[string]*Node{start.Hash: start}
 	closedSet := map[string]*Node{}
 	a.GScore[start.Hash] = 0
 	a.FScore[start.Hash] = h(start, goal)
 	for len(openSet) > 0 {
-		elem := getLowestCost(openSet, goal, h)
+		elem, sortedNode = sortedNode[0], sortedNode[1:]
+		delete(openSet, elem.Hash)
 		if elem.Hash == goal.Hash {
 			return reconstructPath(a.CameFrom, elem)
 		}
@@ -155,10 +179,11 @@ func (a *Algo) AStar(start *Node, goal *Node, h func(*Node, *Node) int) []*Node 
 			if currGScore < a.GScore[children.Hash] {
 				children.Parent = elem
 				a.GScore[children.Hash] = currGScore
-				// fmt.Printf("Heuristique: %d\n", h(children, goal))
 				a.FScore[children.Hash] = a.GScore[children.Hash] + children.Heuristique
 				if _, ok := openSet[children.Hash]; !ok {
 					openSet[children.Hash] = children
+					i := binarySearch(sortedNode, children.Heuristique)
+					sortedNode = append(sortedNode[:i], append([]*Node{children}, sortedNode[i:]...)...)
 				}
 			}
 		}
