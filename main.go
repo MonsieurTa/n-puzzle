@@ -4,18 +4,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/MonsieurTa/n-puzzle/gen"
-
 	"github.com/MonsieurTa/n-puzzle/algo"
+	"github.com/MonsieurTa/n-puzzle/gen"
 	"github.com/MonsieurTa/n-puzzle/parser"
 	"github.com/MonsieurTa/n-puzzle/utils"
 )
 
 func main() {
-	// TODO: Handle those args
-	// args := os.Args[1:]
+	var npuzzle parser.Data
+	parser.ParseArgs(&npuzzle)
 
-	start, err := parser.Parse()
+	start, err := parser.Parse(&npuzzle)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err, "\n")
 		return
@@ -38,14 +37,29 @@ func main() {
 		State: board,
 	}
 	a.Init(len(board), &goal)
-	if gen.IsSolvable(board) {
-		result := a.AStar(&root, &goal, algo.ManhattanHeuristic)
-		println(len(result))
-		for _, node := range result {
-			algo.DisplayState(node)
+	if gen.IsSolvable(start) {
+		result := a.AStar(&root, &goal, npuzzle.Heuristic)
+		if result.Nodes != nil {
+			for _, node := range result.Nodes {
+				displayState(&npuzzle, node)
+			}
+			algo.OutputToJson(result.Nodes, goal.State)
+			fmt.Fprintf(npuzzle.Output, "Time complexity: %d nodes in memory\n", result.TimeComplex)
+			fmt.Fprintf(npuzzle.Output, "Size complexity: %d nodes evaluated\n", result.SizeComplex)
+			fmt.Fprintf(npuzzle.Output, "Moves required: %d\n", len(result.Nodes))
+			return
 		}
-		algo.OutputToJson(result, goal.State)
-	} else {
-		fmt.Print("Unsolvable !")
 	}
+	displayState(&npuzzle, &root)
+	fmt.Print("This puzzle is unsolvable!\n")
+
+	npuzzle.File.Close()
+	npuzzle.Output.Close()
+}
+
+func displayState(data *parser.Data, a *algo.Node) {
+	for _, row := range a.State {
+		fmt.Fprintf(data.Output, "%v\n", row)
+	}
+	fmt.Fprint(data.Output, "\n")
 }

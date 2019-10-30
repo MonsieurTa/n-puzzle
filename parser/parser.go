@@ -4,15 +4,14 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/MonsieurTa/n-puzzle/utils"
 )
 
-func Parse() ([][]int, error) {
-	reader := bufio.NewReader(os.Stdin)
+func Parse(data *Data) ([][]int, error) {
+	reader := bufio.NewReader(data.File)
 	sizeStr, err := readLine(reader)
 	if err != nil {
 		return nil, err
@@ -51,7 +50,6 @@ func readLine(reader *bufio.Reader) (string, error) {
 	}
 	hashtagIndex := strings.IndexByte(str, '#')
 	if hashtagIndex >= 0 {
-		fmt.Print(str[hashtagIndex:])
 		str = str[:hashtagIndex]
 	}
 	str = strings.TrimSpace(str)
