@@ -43,9 +43,9 @@ func main() {
 	if gen.IsSolvable(start, board) {
 		result := a.AStar(&root, &goal, npuzzle.Heuristic)
 		if result.Nodes != nil {
-			for _, node := range result.Nodes {
-				displayState(&npuzzle, node)
-			}
+			// for _, node := range result.Nodes {
+			// 	displayState(&npuzzle, node)
+			// }
 			if npuzzle.JsonOutput {
 				algo.OutputToJson(result.Nodes, goal.State)
 			}

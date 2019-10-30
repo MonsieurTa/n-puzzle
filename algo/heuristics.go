@@ -57,38 +57,32 @@ func Gasching(a, b *Node) int {
 }
 
 func Manhattan(a, b *Node) int {
-	return distanceHeuristic(a, b, func(x1, x2, y1, y2 int) int {
-		return int(math.Abs(float64(x1-x2)) + math.Abs(float64(y1-y2)))
+	return distance(a, b, func(x1, x2, y1, y2 int) int {
+		return int(math.Abs(float64(x2-x1)) + math.Abs(float64(y2-y1)))
 	})
 }
 
 func Euclidian(a, b *Node) int {
-	return distanceHeuristic(a, b, func(x1, x2, y1, y2 int) int {
+	return distance(a, b, func(x1, x2, y1, y2 int) int {
 		return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
 	})
 }
 
-func distanceHeuristic(a, b *Node, get func(int, int, int, int) int) int {
+func distance(a, b *Node, get func(int, int, int, int) int) int {
 	res := 0
 	size := len(b.State)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
-			found := false
-			var k int
-			var l int
-			for k = 0; k < size; k++ {
-				for l = 0; l < size; l++ {
-					if a.State[i][j] != 0 && a.State[i][j] == b.State[k][l] {
-						found = true
-						break
+			if a.State[i][j] != 0 && a.State[i][j] != b.State[i][j] {
+				found := false
+				for k := 0; k < size && !found; k++ {
+					for l := 0; l < size && !found; l++ {
+						if b.State[k][l] == a.State[i][j] {
+							res += get(j, l, i, k)
+							found = true
+						}
 					}
 				}
-				if found {
-					break
-				}
-			}
-			if found {
-				res += get(i, k, j, l)
 			}
 		}
 	}
@@ -116,6 +110,7 @@ func isInGoalColumn(value, col int, state [][]int, goal [][]int) (int, bool) {
 func searchRowConflict(x, xx, y int, state, goal [][]int) int {
 	inc := 1
 	value := state[y][x]
+	m := len(state) / 2
 	ret := 0
 	if x > xx {
 		inc = -1
@@ -126,7 +121,9 @@ func searchRowConflict(x, xx, y int, state, goal [][]int) int {
 	for x != xx {
 		currValue := state[y][x]
 		if _, ok := isInGoalRow(currValue, y, state, goal); ok {
-			if currValue > value {
+			if x > m && (inc == 1 && currValue > value || inc == -1 && currValue < value) {
+				ret++
+			} else if x < m && (inc == 1 && currValue < value || inc == -1 && currValue > value) {
 				ret++
 			}
 		}
@@ -139,6 +136,7 @@ func searchColumnConflict(y, yy, x int, state, goal [][]int) int {
 	inc := 1
 	value := state[y][x]
 	ret := 0
+	m := len(state) / 2
 	if y > yy {
 		inc = -1
 	}
@@ -146,7 +144,9 @@ func searchColumnConflict(y, yy, x int, state, goal [][]int) int {
 	for y != yy {
 		currValue := state[y][x]
 		if _, ok := isInGoalColumn(currValue, x, state, goal); ok {
-			if currValue > value {
+			if y > m && (inc == 1 && currValue > value || inc == -1 && currValue < value) {
+				ret++
+			} else if y < m && (inc == 1 && currValue < value || inc == -1 && currValue > value) {
 				ret++
 			}
 		}

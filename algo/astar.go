@@ -12,14 +12,17 @@ import (
 const MaxUint = ^uint(0)
 const MaxInt = int(MaxUint >> 1)
 
+//Node ...
 type Node struct {
 	Parent    *Node
 	X, Y      int
 	Hash      string
 	State     [][]int
 	Heuristic int
+	Fscore    int
 }
 
+//Algo ...
 type Algo struct {
 	Goal     *Node
 	CameFrom []*Node
@@ -27,12 +30,14 @@ type Algo struct {
 	FScore   map[string]int
 }
 
+//Return ...
 type Return struct {
 	TimeComplex int
 	SizeComplex int
 	Nodes       []*Node
 }
 
+//HashState ...
 func HashState(State [][]int) string {
 	base := ""
 	for _, row := range State {
@@ -114,6 +119,7 @@ func reconstructPath(cameFrom []*Node, current *Node) []*Node {
 	return totalPath
 }
 
+//Init ...
 func (a *Algo) Init(size int, goal *Node) {
 	totalSize := size * size
 	a.CameFrom = make([]*Node, totalSize)
@@ -130,9 +136,9 @@ func binarySearch(list []*Node, x int) int {
 	for low <= high {
 		m := int(math.Floor(float64(low+high) / 2))
 		ret = m
-		if list[m].Heuristic < x {
+		if list[m].Fscore < x {
 			low = m + 1
-		} else if list[m].Heuristic > x {
+		} else if list[m].Fscore > x {
 			high = m - 1
 		} else {
 			return m
@@ -140,8 +146,8 @@ func binarySearch(list []*Node, x int) int {
 	}
 	if len(list) == 0 {
 		return 0
-	} else if list[ret].Heuristic > x && ret > 0 {
-		return ret - 1
+	} else if list[ret].Fscore < x {
+		return ret + 1
 	}
 	return ret
 }
@@ -154,6 +160,15 @@ func applyHeuristics(node1 *Node, node2 *Node, arr []func(*Node, *Node) int) int
 	return ret
 }
 
+func isSort(list []*Node) bool {
+	for i := 0; i < len(list)-1; i++ {
+		if list[i].Fscore > list[i+1].Fscore {
+			return false
+		}
+	}
+	return true
+}
+
 func (a *Algo) AStar(start *Node, goal *Node, h []func(*Node, *Node) int) Return {
 	var elem *Node
 	// Initializing return
@@ -164,7 +179,7 @@ func (a *Algo) AStar(start *Node, goal *Node, h []func(*Node, *Node) int) Return
 	openSet := map[string]*Node{start.Hash: start}
 	closedSet := map[string]*Node{}
 	a.GScore[start.Hash] = 0
-	a.FScore[start.Hash] = applyHeuristics(start, goal, h)
+	start.Fscore = applyHeuristics(start, goal, h)
 	for len(openSet) > 0 {
 		elem, sortedNode = sortedNode[0], sortedNode[1:]
 		delete(openSet, elem.Hash)
@@ -184,10 +199,10 @@ func (a *Algo) AStar(start *Node, goal *Node, h []func(*Node, *Node) int) Return
 			if currGScore < a.GScore[children.Hash] {
 				children.Parent = elem
 				a.GScore[children.Hash] = currGScore
-				a.FScore[children.Hash] = a.GScore[children.Hash] + children.Heuristic
+				children.Fscore = a.GScore[children.Hash] + children.Heuristic
 				if _, ok := openSet[children.Hash]; !ok {
 					openSet[children.Hash] = children
-					i := binarySearch(sortedNode, children.Heuristic)
+					i := binarySearch(sortedNode, children.Fscore)
 					sortedNode = append(sortedNode[:i], append([]*Node{children}, sortedNode[i:]...)...)
 				}
 			}
