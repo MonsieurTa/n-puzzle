@@ -43,7 +43,9 @@ func main() {
 			for _, node := range result.Nodes {
 				displayState(&npuzzle, node)
 			}
-			algo.OutputToJson(result.Nodes, goal.State)
+			if npuzzle.JsonOutput {
+				algo.OutputToJson(result.Nodes, goal.State)
+			}
 			fmt.Fprintf(npuzzle.Output, "Time complexity: %d nodes in memory\n", result.TimeComplex)
 			fmt.Fprintf(npuzzle.Output, "Size complexity: %d nodes evaluated\n", result.SizeComplex)
 			fmt.Fprintf(npuzzle.Output, "Moves required: %d\n", len(result.Nodes))
