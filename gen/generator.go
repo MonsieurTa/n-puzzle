@@ -1,6 +1,7 @@
 package gen
 
 import (
+	"math"
 	"math/rand"
 	"time"
 )
@@ -25,39 +26,55 @@ func Generate(size int) [][]int {
 	return ret
 }
 
-func IsSolvable(data [][]int) bool {
-	size := len(data)
-	// Copying the 2d array to 1d
-	arr := make([]int, 0)
-	for _, row := range data {
-		arr = append(arr, row...)
-	}
+func IsSolvable(data [][]int, finalGrid [][]int) bool {
+	// Converting 2d arrays to 1d
+	arr := flattenArray(data)
+	goalArr := flattenArray(finalGrid)
 
 	nbr := 0
-	blankRowOdd := isBlankRowOdd(data)
-	for i := 0; i < len(arr); i++ {
+	for i := 0; i < len(arr)-1; i++ {
 		for j := i + 1; j < len(arr); j++ {
-			if arr[j] != 0 && arr[j] < arr[i] {
+			vi := arr[i]
+			vj := arr[j]
+			if findNbrIndex(goalArr, vj) < findNbrIndex(goalArr, vi) {
 				nbr++
 			}
 		}
 	}
 
-	if size%2 != 0 {
-		return nbr%2 != 0
-	} else {
-		return (nbr%2 == 0) == blankRowOdd
-	}
+	x, y := findZeroPosition(data)
+	goalX, goalY := findZeroPosition(finalGrid)
+	wantedModulo := int(math.Abs(float64(x-goalX)) + math.Abs(float64(y-goalY)))
+
+	return (wantedModulo%2 == 0) == (nbr%2 == 0)
 }
 
-func isBlankRowOdd(data [][]int) bool {
+func flattenArray(data [][]int) []int {
+	arr := make([]int, 0)
+	for _, row := range data {
+		arr = append(arr, row...)
+	}
+	return arr
+}
+
+func findNbrIndex(data []int, nbr int) int {
+	size := len(data)
+	for i := 0; i < size; i++ {
+		if data[i] == nbr {
+			return i
+		}
+	}
+	return -1
+}
+
+func findZeroPosition(data [][]int) (int, int) {
 	size := len(data)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
 			if data[i][j] == 0 {
-				return ((size - i) % 2) != 0
+				return i, j
 			}
 		}
 	}
-	return false
+	return -1, -1
 }

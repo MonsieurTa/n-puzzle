@@ -37,7 +37,7 @@ func main() {
 		State: board,
 	}
 	a.Init(len(board), &goal)
-	if gen.IsSolvable(start) {
+	if gen.IsSolvable(start, board) {
 		result := a.AStar(&root, &goal, npuzzle.Heuristic)
 		if result.Nodes != nil {
 			for _, node := range result.Nodes {
@@ -53,7 +53,7 @@ func main() {
 		}
 	}
 	displayState(&npuzzle, &root)
-	fmt.Print("This puzzle is unsolvable!\n")
+	fmt.Fprint(npuzzle.Output, "# This puzzle is unsolvable\n")
 
 	npuzzle.File.Close()
 	npuzzle.Output.Close()
