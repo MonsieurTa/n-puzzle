@@ -2,6 +2,13 @@ package algo
 
 import "math"
 
+var Heuristics map[string](func(*Node, *Node) int) = map[string](func(*Node, *Node) int){
+	"default":   DefaultHeuristic,
+	"hamming":   DefaultHeuristic,
+	"manhattan": ManhattanHeuristic,
+	"euclidian": EuclidianHeuristic,
+}
+
 func DefaultHeuristic(a, b *Node) int {
 	res := 0
 	size := len(b.State)
