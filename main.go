@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/MonsieurTa/n-puzzle/algo"
 	"github.com/MonsieurTa/n-puzzle/gen"
@@ -11,6 +12,32 @@ import (
 
 func main() {
 	var npuzzle parser.Data
+
+	args := os.Args[1:]
+	if args[0] == "gen" {
+		if len(args) < 2 {
+			fmt.Fprint(os.Stderr, "n-puzzle: generator: ./n-puzzle gen <nbr>\n")
+			return
+		}
+		nbr, err := strconv.Atoi(args[1])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "n-puzzle: got '%s' while expected an integer\n", args[1])
+			return
+		}
+		if nbr > 100 || nbr < 2 {
+			fmt.Fprint(os.Stderr, "n-puzzle: number must be between 2 and 100\n")
+			return
+		}
+		data := gen.Generate(nbr)
+		fmt.Print(nbr, "\n")
+		for _, line := range data {
+			for _, el := range line {
+				fmt.Print(el, " ")
+			}
+			fmt.Print("\n")
+		}
+		return
+	}
 	parser.ParseArgs(&npuzzle)
 
 	start, err := parser.Parse(&npuzzle)
@@ -56,7 +83,7 @@ func main() {
 		}
 	}
 	displayState(&npuzzle, &root)
-	fmt.Fprint(npuzzle.Output, "# This puzzle is unsolvable\n")
+	fmt.Fprint(npuzzle.Output, "This puzzle is unsolvable!\n")
 
 	npuzzle.File.Close()
 	npuzzle.Output.Close()
