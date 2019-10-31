@@ -169,20 +169,34 @@ func isSort(list []*Node) bool {
 	return true
 }
 
+func getLowestCost(mapper map[string]*Node, goal *Node) *Node {
+	var res *Node
+	score := MaxInt
+	for _, item := range mapper {
+		if item.Heuristic < score {
+			score = item.Heuristic
+			res = item
+		}
+	}
+	delete(mapper, res.Hash)
+	return res
+}
+
 func (a *Algo) AStar(start *Node, goal *Node, greedy bool, h []func(*Node, *Node) int) Return {
 	var elem *Node
 	// Initializing return
 	var ret Return
 	ret.Nodes = nil
 
-	sortedNode := []*Node{start}
+	// sortedNode := []*Node{start}
 	openSet := map[string]*Node{start.Hash: start}
 	closedSet := map[string]*Node{}
 	a.GScore[start.Hash] = 0
 	start.Fscore = applyHeuristics(start, goal, h)
 	for len(openSet) > 0 {
-		elem, sortedNode = sortedNode[0], sortedNode[1:]
-		delete(openSet, elem.Hash)
+		elem = getLowestCost(openSet, goal)
+		// elem, sortedNode = sortedNode[0], sortedNode[1:]
+		// delete(openSet, elem.Hash)
 		if elem.Hash == goal.Hash {
 			ret.Nodes = reconstructPath(a.CameFrom, elem)
 			ret.SizeComplex = len(openSet) + len(closedSet)
@@ -206,8 +220,8 @@ func (a *Algo) AStar(start *Node, goal *Node, greedy bool, h []func(*Node, *Node
 				}
 				if _, ok := openSet[children.Hash]; !ok {
 					openSet[children.Hash] = children
-					i := binarySearch(sortedNode, children.Fscore)
-					sortedNode = append(sortedNode[:i], append([]*Node{children}, sortedNode[i:]...)...)
+					// i := binarySearch(sortedNode, children.Fscore)
+					// sortedNode = append(sortedNode[:i], append([]*Node{children}, sortedNode[i:]...)...)
 				}
 			}
 		}
