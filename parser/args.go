@@ -54,16 +54,23 @@ func (i *heuristicSlice) String() string {
 
 // Set() method needed for flag#var, used to add a new heuristic
 func (i *heuristicSlice) Set(value string) error {
-	heuristic, ok := algo.Heuristics[value]
-	if !ok {
-		return fmt.Errorf("unknown heuristic")
+	if value != "all" {
+		heuristic, ok := algo.Heuristics[value]
+		if !ok {
+			return fmt.Errorf("unknown heuristic")
+		}
+		ok, present := globalData.heuristicNames[value]
+		if ok || present {
+			return fmt.Errorf("heuristic already present")
+		}
+		*i = append(*i, heuristic)
+		globalData.heuristicNames[value] = true
+	} else {
+		for name, fct := range algo.Heuristics {
+			*i = append(*i, fct)
+			globalData.heuristicNames[name] = true
+		}
 	}
-	ok, present := globalData.heuristicNames[value]
-	if ok || present {
-		return fmt.Errorf("heuristic already present")
-	}
-	*i = append(*i, heuristic)
-	globalData.heuristicNames[value] = true
 	return nil
 }
 
