@@ -2,10 +2,14 @@ package algo
 
 import (
 	"math"
+	"reflect"
+
+	"github.com/MonsieurTa/n-puzzle/utils"
 )
 
 var Heuristics map[string](func(*Node, *Node) int) = map[string](func(*Node, *Node) int){
 	"hamming":   Hamming,
+	"gasching":  Gasching,
 	"manhattan": Manhattan,
 	"euclidian": Euclidian,
 	"conflicts": ManhattanXLinear,
@@ -21,6 +25,34 @@ func Hamming(a, b *Node) int {
 			}
 		}
 	}
+	return res
+}
+
+func Gasching(a, b *Node) int {
+	res := 0
+	curr := utils.FlattenArray(a.State)
+	goal := utils.FlattenArray(b.State)
+	size := len(curr)
+	for {
+		if reflect.DeepEqual(goal, curr) {
+			break
+		}
+		currZeroIndex := utils.FindNbrIndex(curr, 0)
+		if goalValue := goal[currZeroIndex]; goalValue != 0 {
+			currIndex := utils.FindNbrIndex(curr, goalValue)
+			curr[currIndex], curr[currZeroIndex] = curr[currZeroIndex], curr[currIndex]
+		} else {
+			for i := 0; i < size; i++ {
+				if curr[i] != goal[i] {
+					curr[i], curr[currZeroIndex] = curr[currZeroIndex], curr[i]
+					break
+				}
+			}
+		}
+
+		res++
+	}
+
 	return res
 }
 

@@ -6,6 +6,8 @@ import (
 	"math"
 	"math/rand"
 	"time"
+
+	"github.com/MonsieurTa/n-puzzle/utils"
 )
 
 // Generate function will return a 2d slice of int, which size is in params
@@ -36,13 +38,13 @@ func Generate(size int) [][]int {
 // both grids % 2, to the number of inversions in the final grid
 func IsSolvable(data [][]int, finalGrid [][]int) bool {
 	// Converting 2d arrays to 1d
-	arr := flattenArray(data)
-	goalArr := flattenArray(finalGrid)
+	arr := utils.FlattenArray(data)
+	goalArr := utils.FlattenArray(finalGrid)
 
 	nbr := 0
 	for i := 0; i < len(arr)-1; i++ {
 		for j := i + 1; j < len(arr); j++ {
-			if findNbrIndex(goalArr, arr[j]) < findNbrIndex(goalArr, arr[i]) {
+			if utils.FindNbrIndex(goalArr, arr[j]) < utils.FindNbrIndex(goalArr, arr[i]) {
 				nbr++
 			}
 		}
@@ -53,26 +55,6 @@ func IsSolvable(data [][]int, finalGrid [][]int) bool {
 	wantedModulo := int(math.Abs(float64(x-goalX)) + math.Abs(float64(y-goalY)))
 
 	return (wantedModulo%2 == 0) == (nbr%2 == 0)
-}
-
-// Takes a 2d slice of ints and flattens it to 1d
-func flattenArray(data [][]int) []int {
-	arr := make([]int, 0)
-	for _, row := range data {
-		arr = append(arr, row...)
-	}
-	return arr
-}
-
-// Returns the index of an int in an int slice
-func findNbrIndex(data []int, nbr int) int {
-	size := len(data)
-	for i := 0; i < size; i++ {
-		if data[i] == nbr {
-			return i
-		}
-	}
-	return -1
 }
 
 // Returns x and y of the 0 in the grid taken in params
