@@ -169,7 +169,7 @@ func isSort(list []*Node) bool {
 	return true
 }
 
-func (a *Algo) AStar(start *Node, goal *Node, h []func(*Node, *Node) int) Return {
+func (a *Algo) AStar(start *Node, goal *Node, greedy bool, h []func(*Node, *Node) int) Return {
 	var elem *Node
 	// Initializing return
 	var ret Return
@@ -196,10 +196,14 @@ func (a *Algo) AStar(start *Node, goal *Node, h []func(*Node, *Node) int) Return
 				continue
 			}
 			currGScore := a.GScore[elem.Hash] + 1
-			if currGScore < a.GScore[children.Hash] {
+			if greedy == true || currGScore < a.GScore[children.Hash] {
 				children.Parent = elem
 				a.GScore[children.Hash] = currGScore
-				children.Fscore = a.GScore[children.Hash] + children.Heuristic
+				if greedy {
+					children.Fscore = children.Heuristic
+				} else {
+					children.Fscore = a.GScore[children.Hash] + children.Heuristic
+				}
 				if _, ok := openSet[children.Hash]; !ok {
 					openSet[children.Hash] = children
 					i := binarySearch(sortedNode, children.Fscore)

@@ -41,7 +41,7 @@ func main() {
 	}
 	a.Init(len(board), &goal)
 	if gen.IsSolvable(start, board) {
-		result := a.AStar(&root, &goal, npuzzle.Heuristic)
+		result := a.AStar(&root, &goal, npuzzle.Greedy, npuzzle.Heuristic)
 		if result.Nodes != nil {
 			// for _, node := range result.Nodes {
 			// 	displayState(&npuzzle, node)

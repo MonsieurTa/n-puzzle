@@ -18,6 +18,7 @@ type Data struct {
 	File           *os.File
 	Output         *os.File
 	JsonOutput     bool
+	Greedy         bool
 }
 
 // We store the data here, so that we don't need to pass it to functions anymore
@@ -87,6 +88,7 @@ func ParseArgs(data *Data) error {
 	flag.StringVar(&inputFile, "f", "", "a file to read in, stdin by default")
 	flag.StringVar(&outputFile, "o", "", "a file to output in, stdout by default")
 	flag.BoolVar(&data.JsonOutput, "json", false, "output or not to json file")
+	flag.BoolVar(&data.Greedy, "g", false, "greedy mode")
 	flag.Parse()
 
 	if len(inputFile) > 0 {
