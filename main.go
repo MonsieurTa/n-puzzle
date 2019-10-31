@@ -7,7 +7,6 @@ import (
 	"github.com/MonsieurTa/n-puzzle/algo"
 	"github.com/MonsieurTa/n-puzzle/gen"
 	"github.com/MonsieurTa/n-puzzle/parser"
-	"github.com/MonsieurTa/n-puzzle/utils"
 )
 
 func main() {
@@ -21,7 +20,7 @@ func main() {
 	}
 
 	var a algo.Algo
-	board := utils.SnailArray(len(start))
+	board := npuzzle.Goal(len(start))
 	x, y := algo.GetRootPos(start)
 	root := algo.Node{
 		Parent: nil,

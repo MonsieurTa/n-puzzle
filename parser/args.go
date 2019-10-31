@@ -5,31 +5,55 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/MonsieurTa/n-puzzle/utils"
+
 	"github.com/MonsieurTa/n-puzzle/algo"
 )
 
 // Struct containing all n-puzzle data
 type Data struct {
 	heuristicNames map[string]bool
-	Heuristic      heuristicArray
+	Goal           goalFunction
+	Heuristic      heuristicSlice
 	File           *os.File
 	Output         *os.File
 	JsonOutput     bool
 }
 
-// Array of heuristic functions, typed for easier usage
-type heuristicArray []func(*algo.Node, *algo.Node) int
-
 // We store the data here, so that we don't need to pass it to functions anymore
 var globalData *Data
 
+// The function to generate the goal
+type goalFunction func(int) [][]int
+
 // String() method needed for flag#var
-func (i *heuristicArray) String() string {
+func (i *goalFunction) String() string {
+	return "The goal function"
+}
+
+// Set() method needed for flag#var, used to set the goal function
+func (i *goalFunction) Set(value string) error {
+	if *i != nil {
+		return fmt.Errorf("goal function already defined")
+	}
+	goal, ok := utils.Goals[value]
+	if !ok {
+		return fmt.Errorf("unknown goal")
+	}
+	*i = goal
+	return nil
+}
+
+// Array of heuristic functions, typed to be used in flag#var
+type heuristicSlice []func(*algo.Node, *algo.Node) int
+
+// String() method needed for flag#var
+func (i *heuristicSlice) String() string {
 	return "Some heuristics"
 }
 
 // Set() method needed for flag#var, used to add a new heuristic
-func (i *heuristicArray) Set(value string) error {
+func (i *heuristicSlice) Set(value string) error {
 	heuristic, ok := algo.Heuristics[value]
 	if !ok {
 		return fmt.Errorf("unknown heuristic")
@@ -52,6 +76,7 @@ func ParseArgs(data *Data) error {
 	var outputFile string
 
 	flag.Var(&data.Heuristic, "heuristic", "an heuristic algorithm between "+getHeuristicNames())
+	flag.Var(&data.Goal, "goal", "a goal between "+getGoalNames())
 	flag.StringVar(&inputFile, "f", "", "a file to read in, stdin by default")
 	flag.StringVar(&outputFile, "o", "", "a file to output in, stdout by default")
 	flag.BoolVar(&data.JsonOutput, "json", false, "output or not to json file")
@@ -71,9 +96,11 @@ func ParseArgs(data *Data) error {
 			return err
 		}
 	}
-	println(len(data.Heuristic))
 	if len(data.Heuristic) == 0 {
 		data.Heuristic = append(data.Heuristic, algo.Manhattan)
+	}
+	if data.Goal == nil {
+		data.Goal = utils.SnailArray
 	}
 	return nil
 }
@@ -83,6 +110,19 @@ func ParseArgs(data *Data) error {
 func getHeuristicNames() string {
 	ret := ""
 	for name := range algo.Heuristics {
+		if len(ret) > 0 {
+			ret += ", "
+		}
+		ret += name
+	}
+	return ret
+}
+
+// This function will concatenate the map of heuristic names
+// into a large string, separed by commas
+func getGoalNames() string {
+	ret := ""
+	for name := range utils.Goals {
 		if len(ret) > 0 {
 			ret += ", "
 		}
