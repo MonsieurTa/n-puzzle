@@ -10,6 +10,8 @@ import (
 	"github.com/MonsieurTa/n-puzzle/utils"
 )
 
+// Parses the data it reads in data.File, returning
+// a 2d int slice and an error.
 func Parse(data *Data) ([][]int, error) {
 	reader := bufio.NewReader(data.File)
 	sizeStr, err := readLine(reader)
@@ -43,6 +45,8 @@ func Parse(data *Data) ([][]int, error) {
 	return tab, nil
 }
 
+// Reads a line from the reader given in params
+// Handles commentaries and returns string data or the error
 func readLine(reader *bufio.Reader) (string, error) {
 	str, err := reader.ReadString('\n')
 	if err != nil {
@@ -59,6 +63,8 @@ func readLine(reader *bufio.Reader) (string, error) {
 	return readLine(reader)
 }
 
+// Function used to parse lines of ints, and check their validity
+// Returns an int slice or an error
 func checkValidity(str string, size int, line int) ([]int, error) {
 	numbers := make([]int, size)
 	words := strings.Fields(str)
@@ -78,6 +84,7 @@ func checkValidity(str string, size int, line int) ([]int, error) {
 	return numbers, nil
 }
 
+// Returns an error not, whether the 2d int slice is valid or not
 func validateTab(tab [][]int, size int) error {
 	maxNbr := (size * size) - 1
 	foundNbrs := make([]int, size*size)
