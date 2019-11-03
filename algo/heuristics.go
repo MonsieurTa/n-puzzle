@@ -7,20 +7,20 @@ import (
 	"github.com/MonsieurTa/n-puzzle/utils"
 )
 
-var Heuristics map[string](func(*Node, *Node) int) = map[string](func(*Node, *Node) int){
+var Heuristics map[string](func([][]int, [][]int) int) = map[string](func([][]int, [][]int) int){
 	"hamming":   Hamming,
 	"gasching":  Gasching,
 	"manhattan": Manhattan,
-	"euclidian": Euclidian,
+	"Euclidean": Euclidean,
 	"conflicts": ManhattanXLinear,
 }
 
-func Hamming(a, b *Node) int {
+func Hamming(a, b [][]int) int {
 	res := 0
-	size := len(b.State)
+	size := len(b)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
-			if a.State[i][j] != 0 && a.State[i][j] != b.State[i][j] {
+			if a[i][j] != 0 && a[i][j] != b[i][j] {
 				res++
 			}
 		}
@@ -28,10 +28,10 @@ func Hamming(a, b *Node) int {
 	return res
 }
 
-func Gasching(a, b *Node) int {
+func Gasching(a, b [][]int) int {
 	res := 0
-	curr := utils.FlattenArray(a.State)
-	goal := utils.FlattenArray(b.State)
+	curr := utils.FlattenArray(a)
+	goal := utils.FlattenArray(b)
 	size := len(curr)
 	for {
 		if reflect.DeepEqual(goal, curr) {
@@ -56,28 +56,28 @@ func Gasching(a, b *Node) int {
 	return res
 }
 
-func Manhattan(a, b *Node) int {
+func Manhattan(a, b [][]int) int {
 	return distance(a, b, func(x1, x2, y1, y2 int) int {
 		return int(math.Abs(float64(x2-x1)) + math.Abs(float64(y2-y1)))
 	})
 }
 
-func Euclidian(a, b *Node) int {
+func Euclidean(a, b [][]int) int {
 	return distance(a, b, func(x1, x2, y1, y2 int) int {
 		return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
 	})
 }
 
-func distance(a, b *Node, get func(int, int, int, int) int) int {
+func distance(a, b [][]int, get func(int, int, int, int) int) int {
 	res := 0
-	size := len(b.State)
+	size := len(b)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
-			if a.State[i][j] != 0 && a.State[i][j] != b.State[i][j] {
+			if a[i][j] != 0 && a[i][j] != b[i][j] {
 				found := false
 				for k := 0; k < size && !found; k++ {
 					for l := 0; l < size && !found; l++ {
-						if b.State[k][l] == a.State[i][j] {
+						if b[k][l] == a[i][j] {
 							res += get(j, l, i, k)
 							found = true
 						}
@@ -155,16 +155,16 @@ func searchColumnConflict(y, yy, x int, state, goal [][]int) int {
 	return ret
 }
 
-func LinearConflict(a, b *Node) int {
+func LinearConflict(a, b [][]int) int {
 	ret := 0
-	for y := range a.State {
-		for x := range a.State[y] {
-			value := a.State[y][x]
+	for y := range a {
+		for x := range a[y] {
+			value := a[y][x]
 			if value != 0 {
-				if xx, ok := isInGoalRow(value, y, a.State, b.State); ok {
-					ret += searchRowConflict(x, xx, y, a.State, b.State)
-				} else if yy, ok := isInGoalColumn(value, x, a.State, b.State); ok {
-					ret += searchColumnConflict(y, yy, x, a.State, b.State)
+				if xx, ok := isInGoalRow(value, y, a, b); ok {
+					ret += searchRowConflict(x, xx, y, a, b)
+				} else if yy, ok := isInGoalColumn(value, x, a, b); ok {
+					ret += searchColumnConflict(y, yy, x, a, b)
 				}
 			}
 		}
@@ -172,6 +172,6 @@ func LinearConflict(a, b *Node) int {
 	return ret * 2
 }
 
-func ManhattanXLinear(a, b *Node) int {
+func ManhattanXLinear(a, b [][]int) int {
 	return Manhattan(a, b) + LinearConflict(a, b)
 }

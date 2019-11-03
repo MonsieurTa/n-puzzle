@@ -46,7 +46,7 @@ func (i *goalFunction) Set(value string) error {
 }
 
 // Array of heuristic functions, typed to be used in flag#var
-type heuristicSlice []func(*algo.Node, *algo.Node) int
+type heuristicSlice []func([][]int, [][]int) int
 
 // String() method needed for flag#var
 func (i *heuristicSlice) String() string {
@@ -144,7 +144,7 @@ func getGoalNames() string {
 // Default File/Output to stdin/stdout
 func initData() {
 	globalData.heuristicNames = map[string]bool{}
-	globalData.Heuristic = []func(*algo.Node, *algo.Node) int{}
+	globalData.Heuristic = []func([][]int, [][]int) int{}
 	globalData.File = os.Stdin
 	globalData.Output = os.Stdout
 }
