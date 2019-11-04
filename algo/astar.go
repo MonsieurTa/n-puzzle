@@ -101,6 +101,7 @@ func (a *Algo) Init(start, goal *state.State) {
 	a.start, a.goal = start, goal
 }
 
+//AStar A* algorithm
 func (a *Algo) AStar(fn func([][]int, [][]int) int, cost int) {
 	start := &Node{
 		State: a.start,
@@ -109,7 +110,6 @@ func (a *Algo) AStar(fn func([][]int, [][]int) int, cost int) {
 	openSet := PriorityQueue{start}
 	openSetMembers := map[string]*Node{start.State.Key: start}
 	gScore := map[string]int{start.State.Key: 0}
-	heap.Init(&openSet)
 	closedSet := make(map[string]*Node)
 	cameFrom := make(map[string]*Node)
 	for len(openSet) > 0 {

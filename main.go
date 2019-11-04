@@ -78,8 +78,8 @@ func main() {
 			if npuzzle.JsonOutput {
 				algo.OutputToJson(a.Path, goal)
 			}
-			fmt.Fprintf(npuzzle.Output, "Time complexity: %d nodes in memory\n", a.Time)
-			fmt.Fprintf(npuzzle.Output, "Space complexity: %d nodes evaluated\n", a.Space)
+			fmt.Fprintf(npuzzle.Output, "Time complexity: %d nodes evaluated\n", a.Time)
+			fmt.Fprintf(npuzzle.Output, "Space complexity: %d nodes in memory\n", a.Space)
 			fmt.Fprintf(npuzzle.Output, "Moves required: %d\n", len(a.Path))
 			return
 		}

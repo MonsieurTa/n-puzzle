@@ -107,10 +107,16 @@ func isInGoalColumn(value, col int, state [][]int, goal [][]int) (int, bool) {
 	return 0, false
 }
 
+func cmpValues(current, target, inc int) int {
+	if inc == 1 && current > target || inc == -1 && current < target {
+		return 1
+	}
+	return 0
+}
+
 func searchRowConflict(x, xx, y int, state, goal [][]int) int {
 	inc := 1
 	value := state[y][x]
-	m := len(state) / 2
 	ret := 0
 	if x > xx {
 		inc = -1
@@ -118,14 +124,11 @@ func searchRowConflict(x, xx, y int, state, goal [][]int) int {
 		return 0
 	}
 	x += inc
+	xx += inc
 	for x != xx {
 		currValue := state[y][x]
 		if _, ok := isInGoalRow(currValue, y, state, goal); ok {
-			if x > m && (inc == 1 && currValue > value || inc == -1 && currValue < value) {
-				ret++
-			} else if x < m && (inc == 1 && currValue < value || inc == -1 && currValue > value) {
-				ret++
-			}
+			ret += cmpValues(currValue, value, inc)
 		}
 		x += inc
 	}
@@ -136,18 +139,16 @@ func searchColumnConflict(y, yy, x int, state, goal [][]int) int {
 	inc := 1
 	value := state[y][x]
 	ret := 0
-	m := len(state) / 2
 	if y > yy {
 		inc = -1
 	}
 	y += inc
+	yy += inc
 	for y != yy {
 		currValue := state[y][x]
 		if _, ok := isInGoalColumn(currValue, x, state, goal); ok {
-			if y > m && (inc == 1 && currValue > value || inc == -1 && currValue < value) {
-				ret++
-			} else if y < m && (inc == 1 && currValue < value || inc == -1 && currValue > value) {
-				ret++
+			if inc == 1 && currValue > value || inc == -1 && currValue < value {
+				ret += cmpValues(currValue, value, inc)
 			}
 		}
 		y += inc
