@@ -10,7 +10,7 @@ type State struct {
 	Board          [][]int
 	size           int
 	xBlank, yBlank int
-	Str            string
+	Key            string
 }
 
 func toString(state [][]int) string {
@@ -27,14 +27,14 @@ func NewState(board [][]int) *State {
 	return &State{
 		Board:  board,
 		size:   len(board),
-		Str:    toString(board),
+		Key:    toString(board),
 		xBlank: x, yBlank: y,
 	}
 }
 
 //CompareState compare two state
 func (s State) CompareState(state State) bool {
-	return s.Str == state.Str
+	return s.Key == state.Key
 }
 
 func getBlankPos(board [][]int) (int, int) {
@@ -58,7 +58,7 @@ func (s State) shiftBlank(x, y int) *State {
 	new.yBlank = y
 	new.Board[y][x] = 0
 	new.Board[s.yBlank][s.xBlank] = s.Board[y][x]
-	new.Str = toString(new.Board)
+	new.Key = toString(new.Board)
 	return &new
 }
 

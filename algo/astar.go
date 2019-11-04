@@ -16,12 +16,14 @@ type PriorityQueue []*Node
 func (pq PriorityQueue) Len() int { return len(pq) }
 
 //Less return priority condition
-func (pq PriorityQueue) Less(i, j int) bool { return pq[i].f < pq[j].f }
+func (pq PriorityQueue) Less(i, j int) bool {
+	return pq[i].f < pq[j].f
+}
 
 func (pq PriorityQueue) Swap(i, j int) {
 	pq[i], pq[j] = pq[j], pq[i]
-	pq[i].index = j
-	pq[j].index = i
+	pq[i].index = i
+	pq[j].index = j
 }
 
 func (pq *PriorityQueue) Push(x interface{}) {
@@ -37,39 +39,30 @@ func (pq *PriorityQueue) Pop() interface{} {
 	item := old[n-1]
 	old[n-1] = nil  // avoid memory leak
 	item.index = -1 // for safety
-	*pq = old[0 : n-1]
+	*pq = old[:n-1]
 	return item
 }
 
 // update modifies the priority and value of an Node in the queue.
-func (pq *PriorityQueue) update(item *Node, g, f, h int) {
-	item.h = h
+func (pq *PriorityQueue) update(item *Node, f int) {
+	item.f = f
 	heap.Fix(pq, item.index)
 }
 
 //Node ...
 type Node struct {
-	index  int
-	parent *Node
-	State  *state.State
-	h      int
-	f      int
+	index int
+	State *state.State
+	h     int
+	f     int
 }
 
-func (n Node) copy() *Node {
-	return &Node{
-		parent: n.parent,
-		State:  n.State,
-		h:      n.h,
-	}
-}
-
-func (n Node) reconstructPath(cameFrom map[string]*Node, size int) []*Node {
-	path := make([]*Node, size)
+func (n Node) reconstructPath(cameFrom map[string]*Node) []*Node {
+	path := make([]*Node, 0)
 	elem := &n
-	for elem.parent != nil {
+	for cameFrom[elem.State.Key] != nil {
 		path = append([]*Node{elem}, path...)
-		elem = cameFrom[elem.State.Str]
+		elem = cameFrom[elem.State.Key]
 	}
 	return path
 }
@@ -78,8 +71,8 @@ func (n Node) getChild(fn func([][]int, [][]int) int, goal [][]int, gScore map[s
 	childState := n.State.GetSurrounding()
 	child := []*Node{}
 	for _, item := range childState {
-		if _, ok := gScore[item.Str]; !ok {
-			gScore[item.Str] = MaxInt
+		if _, ok := gScore[item.Key]; !ok {
+			gScore[item.Key] = MaxInt
 		}
 		h := fn(item.Board, goal)
 		child = append(child, &Node{
@@ -100,7 +93,7 @@ type Algo struct {
 }
 
 func (a Algo) isGoal(state *state.State) bool {
-	return a.goal.Str == state.Str
+	return a.goal.Key == state.Key
 }
 
 // Init set start and goal state to algo struct
@@ -113,40 +106,37 @@ func (a *Algo) AStar(fn func([][]int, [][]int) int) {
 		State: a.start,
 		h:     fn(a.start.Board, a.goal.Board),
 	}
-	fScore := make(map[string]int)
-	gScore := make(map[string]int)
 	openSet := PriorityQueue{start}
-	openSetMembers := make(map[string]string)
-	fScore[start.State.Str] = start.h
-	gScore[start.State.Str] = 0
+	openSetMembers := map[string]*Node{start.State.Key: start}
+	gScore := map[string]int{start.State.Key: 0}
 	heap.Init(&openSet)
-	closedSet := make(map[string]*Node, 0)
+	closedSet := make(map[string]*Node)
 	cameFrom := make(map[string]*Node)
 	for len(openSet) > 0 {
 		elem := heap.Pop(&openSet).(*Node)
-		delete(fScore, elem.State.Str)
-		delete(openSetMembers, elem.State.Str)
+		delete(openSetMembers, elem.State.Key)
 		if a.isGoal(elem.State) {
 			a.Time = len(closedSet)
 			a.Space = len(closedSet) + len(openSet)
-			a.Path = elem.reconstructPath(cameFrom, gScore[elem.State.Str])
+			a.Path = elem.reconstructPath(cameFrom)
 			return
 		}
-		closedSet[elem.State.Str] = elem
+		closedSet[elem.State.Key] = elem
 		child := elem.getChild(fn, a.goal.Board, gScore)
-		tentativeGScore := gScore[elem.State.Str] + 1
+		tentativeGScore := gScore[elem.State.Key] + 1
 		for _, children := range child {
-			if _, ok := closedSet[children.State.Str]; !ok {
-				childrenGScore := gScore[children.State.Str]
+			if _, ok := closedSet[children.State.Key]; !ok {
+				childrenGScore := gScore[children.State.Key]
 				if tentativeGScore < childrenGScore {
-					children.parent = elem
-					cameFrom[children.State.Str] = elem
-					gScore[children.State.Str] = tentativeGScore
-					children.f = children.h + tentativeGScore
-					fScore[children.State.Str] = children.f
-					if _, ok := openSetMembers[children.State.Str]; !ok {
+					cameFrom[children.State.Key] = elem
+					gScore[children.State.Key] = tentativeGScore
+					f := children.h + tentativeGScore
+					if item, ok := openSetMembers[children.State.Key]; !ok {
+						children.f = f
 						heap.Push(&openSet, children)
-						openSetMembers[children.State.Str] = children.State.Str
+						openSetMembers[children.State.Key] = children
+					} else {
+						openSet.update(item, f)
 					}
 				}
 			}
