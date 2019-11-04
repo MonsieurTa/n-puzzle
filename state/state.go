@@ -9,7 +9,7 @@ import (
 type State struct {
 	Board          [][]int
 	size           int
-	xBlank, yBlank int
+	BlankX, BlankY int
 	Key            string
 }
 
@@ -28,7 +28,7 @@ func NewState(board [][]int) *State {
 		Board:  board,
 		size:   len(board),
 		Key:    toString(board),
-		xBlank: x, yBlank: y,
+		BlankX: x, BlankY: y,
 	}
 }
 
@@ -54,10 +54,10 @@ func (s State) shiftBlank(x, y int) *State {
 	}
 	new := s
 	new.Board = utils.DeepCopy(new.Board)
-	new.xBlank = x
-	new.yBlank = y
+	new.BlankX = x
+	new.BlankY = y
 	new.Board[y][x] = 0
-	new.Board[s.yBlank][s.xBlank] = s.Board[y][x]
+	new.Board[s.BlankY][s.BlankX] = s.Board[y][x]
 	new.Key = toString(new.Board)
 	return &new
 }
@@ -65,10 +65,10 @@ func (s State) shiftBlank(x, y int) *State {
 //GetSurrounding get left, right, top, down state from current state
 func (s State) GetSurrounding() []*State {
 	surroundings := []*State{
-		s.shiftBlank(s.xBlank-1, s.yBlank),
-		s.shiftBlank(s.xBlank+1, s.yBlank),
-		s.shiftBlank(s.xBlank, s.yBlank-1),
-		s.shiftBlank(s.xBlank, s.yBlank+1),
+		s.shiftBlank(s.BlankX-1, s.BlankY),
+		s.shiftBlank(s.BlankX+1, s.BlankY),
+		s.shiftBlank(s.BlankX, s.BlankY-1),
+		s.shiftBlank(s.BlankX, s.BlankY+1),
 	}
 	ret := make([]*State, 0)
 	for _, item := range surroundings {
