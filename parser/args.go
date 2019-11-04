@@ -12,13 +12,12 @@ import (
 
 // Struct containing all n-puzzle data
 type Data struct {
-	heuristicNames map[string]bool
-	Goal           goalFunction
-	Heuristic      heuristicSlice
-	File           *os.File
-	Output         *os.File
-	JsonOutput     bool
-	Greedy         bool
+	Goal       goalFunction
+	Heuristic  heuristic
+	File       *os.File
+	Output     *os.File
+	JsonOutput bool
+	Greedy     bool
 }
 
 // We store the data here, so that we don't need to pass it to functions anymore
@@ -46,32 +45,23 @@ func (i *goalFunction) Set(value string) error {
 }
 
 // Array of heuristic functions, typed to be used in flag#var
-type heuristicSlice []func([][]int, [][]int) int
+type heuristic func([][]int, [][]int) int
 
 // String() method needed for flag#var
-func (i *heuristicSlice) String() string {
-	return "Some heuristics"
+func (i *heuristic) String() string {
+	return ""
 }
 
 // Set() method needed for flag#var, used to add a new heuristic
-func (i *heuristicSlice) Set(value string) error {
-	if value != "all" {
-		heuristic, ok := algo.Heuristics[value]
-		if !ok {
-			return fmt.Errorf("unknown heuristic")
-		}
-		ok, present := globalData.heuristicNames[value]
-		if ok || present {
-			return fmt.Errorf("heuristic already present")
-		}
-		*i = append(*i, heuristic)
-		globalData.heuristicNames[value] = true
-	} else {
-		for name, fct := range algo.Heuristics {
-			*i = append(*i, fct)
-			globalData.heuristicNames[name] = true
-		}
+func (i *heuristic) Set(value string) error {
+	if *i != nil {
+		return fmt.Errorf("heuristic already selected")
 	}
+	heuristic, ok := algo.Heuristics[value]
+	if !ok {
+		return fmt.Errorf("unknown heuristic")
+	}
+	*i = heuristic
 	return nil
 }
 
@@ -105,8 +95,8 @@ func ParseArgs(data *Data) error {
 			return err
 		}
 	}
-	if len(data.Heuristic) == 0 {
-		data.Heuristic = append(data.Heuristic, algo.Manhattan)
+	if data.Heuristic == nil {
+		data.Heuristic = algo.Manhattan
 	}
 	if data.Goal == nil {
 		data.Goal = utils.SnailArray
@@ -143,8 +133,6 @@ func getGoalNames() string {
 // Inits the globalData struct
 // Default File/Output to stdin/stdout
 func initData() {
-	globalData.heuristicNames = map[string]bool{}
-	globalData.Heuristic = []func([][]int, [][]int) int{}
 	globalData.File = os.Stdin
 	globalData.Output = os.Stdout
 }

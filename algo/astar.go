@@ -101,7 +101,7 @@ func (a *Algo) Init(start, goal *state.State) {
 	a.start, a.goal = start, goal
 }
 
-func (a *Algo) AStar(fn func([][]int, [][]int) int) {
+func (a *Algo) AStar(fn func([][]int, [][]int) int, cost int) {
 	start := &Node{
 		State: a.start,
 		h:     fn(a.start.Board, a.goal.Board),
@@ -123,7 +123,7 @@ func (a *Algo) AStar(fn func([][]int, [][]int) int) {
 		}
 		closedSet[elem.State.Key] = elem
 		child := elem.getChild(fn, a.goal.Board, gScore)
-		tentativeGScore := gScore[elem.State.Key] + 1
+		tentativeGScore := gScore[elem.State.Key] + cost
 		for _, children := range child {
 			if _, ok := closedSet[children.State.Key]; !ok {
 				childrenGScore := gScore[children.State.Key]
