@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/MonsieurTa/n-puzzle/algo"
 	"github.com/MonsieurTa/n-puzzle/gen"
@@ -17,9 +18,43 @@ func getCost(b bool) int {
 	return 1
 }
 
+func handleGenerator() (bool, error) {
+	args := os.Args[1:]
+	if args[0] == "gen" {
+		if len(args) < 2 {
+			return true, fmt.Errorf("n-puzzle: generator: ./n-puzzle gen <nbr>\n")
+		}
+		nbr, err := strconv.Atoi(args[1])
+		if err != nil {
+			return true, fmt.Errorf("n-puzzle: got '%s' while expected an integer\n", args[1])
+		}
+		if nbr > 100 || nbr < 2 {
+			return true, fmt.Errorf("n-puzzle: number must be between 2 and 100\n")
+		}
+		data := gen.Generate(nbr)
+		fmt.Print(nbr, "\n")
+		for _, line := range data {
+			for _, el := range line {
+				fmt.Print(el, " ")
+			}
+			fmt.Print("\n")
+		}
+		return true, nil
+	}
+	return false, nil
+}
+
 func main() {
 	var npuzzle parser.Data
 	var a algo.Algo
+
+	generated, err := handleGenerator()
+	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+	}
+	if generated {
+		return
+	}
 
 	parser.ParseArgs(&npuzzle)
 	start, err := parser.Parse(&npuzzle)
