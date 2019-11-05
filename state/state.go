@@ -11,6 +11,20 @@ type State struct {
 	size           int
 	BlankX, BlankY int
 	Key            string
+	Cache          map[int][2]int
+}
+
+func (s *State) CacheBoard() {
+	s.Cache = map[int][2]int{}
+	for y, row := range s.Board {
+		for x, tile := range row {
+			s.Cache[tile] = [2]int{x, y}
+		}
+	}
+}
+
+func (s *State) CachedPos(value int) (int, int) {
+	return s.Cache[value][0], s.Cache[value][1]
 }
 
 func toString(state [][]int) string {

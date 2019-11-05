@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/MonsieurTa/n-puzzle/state"
 	"github.com/MonsieurTa/n-puzzle/utils"
 
 	"github.com/MonsieurTa/n-puzzle/algo"
@@ -45,7 +46,7 @@ func (i *goalFunction) Set(value string) error {
 }
 
 // Array of heuristic functions, typed to be used in flag#var
-type heuristic func([][]int, [][]int) int
+type heuristic func([][]int, *state.State) int
 
 // String() method needed for flag#var
 func (i *heuristic) String() string {

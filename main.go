@@ -66,11 +66,12 @@ func main() {
 
 	startState := state.NewState(start)
 	goalState := state.NewState(goal)
+	goalState.CacheBoard()
 	a.Init(startState, goalState)
 
 	fmt.Printf("Initial heuristic scores:\n")
 	for key, value := range algo.Heuristics {
-		fmt.Printf("- %s: %d\n", key, value(start, goal))
+		fmt.Printf("- %s: %d\n", key, value(start, goalState))
 	}
 	if gen.IsSolvable(start, goal) {
 		a.AStar(npuzzle.Heuristic, getCost(npuzzle.Greedy))

@@ -4,23 +4,24 @@ import (
 	"math"
 	"reflect"
 
+	"github.com/MonsieurTa/n-puzzle/state"
 	"github.com/MonsieurTa/n-puzzle/utils"
 )
 
-var Heuristics map[string](func([][]int, [][]int) int) = map[string](func([][]int, [][]int) int){
+var Heuristics map[string](func([][]int, *state.State) int) = map[string](func([][]int, *state.State) int){
 	"hamming":   Hamming,
 	"gasching":  Gasching,
 	"manhattan": Manhattan,
-	"Euclidean": Euclidean,
+	"euclidean": Euclidean,
 	"conflicts": ManhattanXLinear,
 }
 
-func Hamming(a, b [][]int) int {
+func Hamming(a [][]int, b *state.State) int {
 	res := 0
-	size := len(b)
+	size := len(b.Board)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
-			if a[i][j] != 0 && a[i][j] != b[i][j] {
+			if a[i][j] != 0 && a[i][j] != b.Board[i][j] {
 				res++
 			}
 		}
@@ -28,10 +29,10 @@ func Hamming(a, b [][]int) int {
 	return res
 }
 
-func Gasching(a, b [][]int) int {
+func Gasching(a [][]int, b *state.State) int {
 	res := 0
 	curr := utils.FlattenArray(a)
-	goal := utils.FlattenArray(b)
+	goal := utils.FlattenArray(b.Board)
 	size := len(curr)
 	for {
 		if reflect.DeepEqual(goal, curr) {
@@ -56,32 +57,62 @@ func Gasching(a, b [][]int) int {
 	return res
 }
 
-func Manhattan(a, b [][]int) int {
+func Manhattan(a [][]int, b *state.State) int {
 	return distance(a, b, func(x1, x2, y1, y2 int) int {
 		return int(math.Abs(float64(x2-x1)) + math.Abs(float64(y2-y1)))
 	})
 }
 
-func Euclidean(a, b [][]int) int {
+func Euclidean(a [][]int, b *state.State) int {
 	return distance(a, b, func(x1, x2, y1, y2 int) int {
 		return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
 	})
 }
 
-func distance(a, b [][]int, get func(int, int, int, int) int) int {
+func distance(a [][]int, b *state.State, get func(int, int, int, int) int) int {
 	res := 0
-	size := len(b)
+	size := len(b.Board)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
-			if a[i][j] != 0 && a[i][j] != b[i][j] {
-				found := false
-				for k := 0; k < size && !found; k++ {
-					for l := 0; l < size && !found; l++ {
-						if b[k][l] == a[i][j] {
-							res += get(j, l, i, k)
-							found = true
-						}
-					}
+			if a[i][j] != 0 && a[i][j] != b.Board[i][j] {
+				x2, y2 := b.CachedPos(a[i][j])
+				res += get(j, x2, i, y2)
+			}
+		}
+	}
+	return res
+}
+
+func rowConflicts(x, y int, row []int, goal *state.State, rowMap map[int]bool) int {
+	res := 0
+	for i := range row {
+		if i != x {
+			if xGoal, yGoal := goal.CachedPos(row[i]); yGoal == y {
+
+				res++
+			}
+		}
+	}
+	return res
+}
+
+func columnConflicts(x, y int, goal *state.State) int {
+	res := 0
+
+	return res
+}
+
+func LinearConflict(a [][]int, b *state.State) int {
+	res := 0
+
+	for y, row := range a {
+		for x, tile := range row {
+			if tile != 0 && tile != b.Board[y][x] {
+				goalX, goalY := b.CachedPos(tile)
+				if x == goalX {
+					// COLUMN CONFLICT
+				} else if y == goalY {
+					// ROW CONFLICT
 				}
 			}
 		}
@@ -89,90 +120,6 @@ func distance(a, b [][]int, get func(int, int, int, int) int) int {
 	return res
 }
 
-func isInGoalRow(value, row int, state [][]int, goal [][]int) (int, bool) {
-	for i := 0; i < len(goal); i++ {
-		if goal[row][i] == value {
-			return i, true
-		}
-	}
-	return 0, false
-}
-
-func isInGoalColumn(value, col int, state [][]int, goal [][]int) (int, bool) {
-	for i := 0; i < len(goal); i++ {
-		if goal[i][col] == value {
-			return i, true
-		}
-	}
-	return 0, false
-}
-
-func cmpValues(current, target, inc int) int {
-	if inc == 1 && current > target || inc == -1 && current < target {
-		return 1
-	}
-	return 0
-}
-
-func searchRowConflict(x, xx, y int, state, goal [][]int) int {
-	inc := 1
-	value := state[y][x]
-	ret := 0
-	if x > xx {
-		inc = -1
-	} else if x == xx {
-		return 0
-	}
-	x += inc
-	xx += inc
-	for x != xx {
-		currValue := state[y][x]
-		if _, ok := isInGoalRow(currValue, y, state, goal); ok {
-			ret += cmpValues(currValue, value, inc)
-		}
-		x += inc
-	}
-	return ret
-}
-
-func searchColumnConflict(y, yy, x int, state, goal [][]int) int {
-	inc := 1
-	value := state[y][x]
-	ret := 0
-	if y > yy {
-		inc = -1
-	}
-	y += inc
-	yy += inc
-	for y != yy {
-		currValue := state[y][x]
-		if _, ok := isInGoalColumn(currValue, x, state, goal); ok {
-			if inc == 1 && currValue > value || inc == -1 && currValue < value {
-				ret += cmpValues(currValue, value, inc)
-			}
-		}
-		y += inc
-	}
-	return ret
-}
-
-func LinearConflict(a, b [][]int) int {
-	ret := 0
-	for y := range a {
-		for x := range a[y] {
-			value := a[y][x]
-			if value != 0 {
-				if xx, ok := isInGoalRow(value, y, a, b); ok {
-					ret += searchRowConflict(x, xx, y, a, b)
-				} else if yy, ok := isInGoalColumn(value, x, a, b); ok {
-					ret += searchColumnConflict(y, yy, x, a, b)
-				}
-			}
-		}
-	}
-	return ret * 2
-}
-
-func ManhattanXLinear(a, b [][]int) int {
+func ManhattanXLinear(a [][]int, b *state.State) int {
 	return Manhattan(a, b) + LinearConflict(a, b)
 }

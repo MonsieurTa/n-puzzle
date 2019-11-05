@@ -67,7 +67,7 @@ func (n Node) reconstructPath(cameFrom map[string]*Node) []*Node {
 	return path
 }
 
-func (n Node) getChild(fn func([][]int, [][]int) int, goal [][]int, gScore map[string]int) []*Node {
+func (n Node) getChild(fn func([][]int, *state.State) int, goal *state.State, gScore map[string]int) []*Node {
 	childState := n.State.GetSurrounding()
 	child := []*Node{}
 	for _, item := range childState {
@@ -102,10 +102,10 @@ func (a *Algo) Init(start, goal *state.State) {
 }
 
 //AStar A* algorithm
-func (a *Algo) AStar(fn func([][]int, [][]int) int, cost int) {
+func (a *Algo) AStar(fn func([][]int, *state.State) int, cost int) {
 	start := &Node{
 		State: a.start,
-		h:     fn(a.start.Board, a.goal.Board),
+		h:     fn(a.start.Board, a.goal),
 	}
 	openSet := PriorityQueue{start}
 	openSetMembers := map[string]*Node{start.State.Key: start}
@@ -122,7 +122,7 @@ func (a *Algo) AStar(fn func([][]int, [][]int) int, cost int) {
 			return
 		}
 		closedSet[elem.State.Key] = elem
-		child := elem.getChild(fn, a.goal.Board, gScore)
+		child := elem.getChild(fn, a.goal, gScore)
 		tentativeGScore := gScore[elem.State.Key] + cost
 		for _, children := range child {
 			if _, ok := closedSet[children.State.Key]; !ok {
