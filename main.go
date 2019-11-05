@@ -20,7 +20,7 @@ func getCost(b bool) int {
 
 func handleGenerator() (bool, error) {
 	args := os.Args[1:]
-	if args[0] == "gen" {
+	if len(args) > 0 && args[0] == "gen" {
 		if len(args) < 2 {
 			return true, fmt.Errorf("n-puzzle: generator: ./n-puzzle gen <nbr>\n")
 		}

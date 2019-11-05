@@ -17,7 +17,7 @@ func OutputToJson(nodes []*Node, goal [][]int) {
 	if nodesLen == 0 {
 		return
 	}
-	start, err := json.Marshal(nodes[0].State)
+	start, err := json.Marshal(nodes[0].State.Board)
 	if err != nil {
 		fmt.Fprint(os.Stderr, "n-puzzle: error converting start to JSON data")
 		data += "'error'"
@@ -38,8 +38,6 @@ func OutputToJson(nodes []*Node, goal [][]int) {
 	for i := 0; i < nodesLen-1; i++ {
 		steps[i] = getStep(nodes[i], nodes[i+1])
 	}
-
-	fmt.Print(steps)
 
 	stepsJson, err := json.Marshal(steps)
 	if err != nil {
