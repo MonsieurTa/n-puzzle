@@ -65,9 +65,9 @@ function getSideDiv(div, direction) {
     return null
 }
 /**
- * 
- * @param {Number} nbr 
- * @param {String} direction 
+ *
+ * @param {Number} nbr
+ * @param {String} direction
  */
 function moveNumberInGrid(nbr, direction) {
     let i, j
@@ -162,7 +162,7 @@ function moveNumber(nbr, direction) {
         case 'right':
             intervalId = setInterval(() => {
                 if (incr == 0) {
-                    prepareDivs(nbrDiv, sideDiv)                    
+                    prepareDivs(nbrDiv, sideDiv)
                     nbrDiv.style.marginRight = '0px'
                     sideDiv.style.marginLeft = '0px'
                 }
@@ -185,7 +185,7 @@ function moveNumber(nbr, direction) {
 
         // Launching next step
         stepIndex++
-        if (stepIndex < steps.length) {
+        if (stepIndex < steps.length && steps[stepIndex]) {
             moveNumber(steps[stepIndex].nbr, steps[stepIndex].dir)
         }
     }, speed * 110)
