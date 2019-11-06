@@ -83,10 +83,10 @@ func distance(a [][]int, b *state.State, get func(int, int, int, int) int) int {
 	return res
 }
 
-func rowConflicts(x, y int, row []int, goal *state.State, rowMap map[int]bool) int {
+func rowConflicts(x, y int, row []int, goal *state.State) int {
 	res := 0
-	for i := range row {
-		if i != x {
+	for i := x ; i < len(row); i++ {
+		if i != (x - 1) {
 			if _, yGoal := goal.CachedPos(row[i]); yGoal == y {
 				res++
 			}
@@ -95,9 +95,15 @@ func rowConflicts(x, y int, row []int, goal *state.State, rowMap map[int]bool) i
 	return res
 }
 
-func columnConflicts(x, y int, goal *state.State) int {
+func columnConflicts(x, y int, board [][]int,goal *state.State) int {
 	res := 0
-
+	for i := y ; i < len(board); i++ {
+		if i != (y - 1) {
+			if xGoal, _ := goal.CachedPos(board[i][x]); xGoal == x {
+				res++
+			}
+		}
+	}
 	return res
 }
 
@@ -109,9 +115,9 @@ func LinearConflict(a [][]int, b *state.State) int {
 			if tile != 0 && tile != b.Board[y][x] {
 				goalX, goalY := b.CachedPos(tile)
 				if x == goalX {
-					// COLUMN CONFLICT
+					res += columnConflicts(x, y + 1, a, b)
 				} else if y == goalY {
-					// ROW CONFLICT
+					res += rowConflicts(x + 1, y, row, b)
 				}
 			}
 		}
