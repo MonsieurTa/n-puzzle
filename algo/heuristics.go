@@ -87,8 +87,7 @@ func rowConflicts(x, y int, row []int, goal *state.State, rowMap map[int]bool) i
 	res := 0
 	for i := range row {
 		if i != x {
-			if xGoal, yGoal := goal.CachedPos(row[i]); yGoal == y {
-
+			if _, yGoal := goal.CachedPos(row[i]); yGoal == y {
 				res++
 			}
 		}
