@@ -69,9 +69,9 @@ func main() {
 	goalState.CacheBoard()
 	a.Init(startState, goalState)
 
-	fmt.Printf("Initial heuristic scores:\n")
+	fmt.Fprintf(npuzzle.Output, "Initial heuristic scores:\n")
 	for key, value := range algo.Heuristics {
-		fmt.Printf("- %s: %d\n", key, value(start, goalState))
+		fmt.Fprintf(npuzzle.Output, "- %s: %d\n", key, value(start, goalState))
 	}
 	if gen.IsSolvable(start, goal) {
 		a.AStar(npuzzle.Heuristic, getCost(npuzzle.Greedy))
@@ -79,6 +79,12 @@ func main() {
 			if npuzzle.JsonOutput {
 				algo.OutputToJson(a.Path, goal)
 			}
+			fmt.Fprint(npuzzle.Output, "\n- Start -\n\n")
+			for _, node := range a.Path {
+				node.State.Display(npuzzle.Output)
+				fmt.Fprint(npuzzle.Output, "\n")
+			}
+			fmt.Fprint(npuzzle.Output, "- Goal -\n\n")
 			fmt.Fprintf(npuzzle.Output, "Time complexity: %d nodes evaluated\n", a.Time)
 			fmt.Fprintf(npuzzle.Output, "Space complexity: %d nodes in memory\n", a.Space)
 			fmt.Fprintf(npuzzle.Output, "Moves required: %d\n", len(a.Path))

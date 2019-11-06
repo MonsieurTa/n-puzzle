@@ -2,6 +2,7 @@ package state
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/MonsieurTa/n-puzzle/utils"
 )
@@ -93,4 +94,25 @@ func (s State) GetSurrounding() []*State {
 		}
 	}
 	return ret
+}
+
+func (s State) Display(file *os.File) {
+	padding := s.getPadding()
+	for _, line := range s.Board {
+		for _, nbr := range line {
+			nbrStr := fmt.Sprintf("%d", nbr)
+			curr := len(nbrStr)
+			for curr < padding {
+				file.WriteString(" ")
+				curr++
+			}
+			file.WriteString(nbrStr)
+			file.WriteString(" ")
+		}
+		file.WriteString("\n")
+	}
+}
+
+func (s State) getPadding() int {
+	return len(fmt.Sprintf("%d", s.size*s.size-1))
 }
