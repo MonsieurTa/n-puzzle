@@ -50,7 +50,6 @@ func Gasching(a [][]int, b *state.State) int {
 				}
 			}
 		}
-
 		res++
 	}
 
@@ -83,25 +82,21 @@ func distance(a [][]int, b *state.State, get func(int, int, int, int) int) int {
 	return res
 }
 
-func rowConflicts(x, y int, row []int, goal *state.State) int {
+func rowConflicts(goalX, x, y int, row []int, goal *state.State) int {
 	res := 0
-	for i := x ; i < len(row); i++ {
-		if i != (x - 1) {
-			if _, yGoal := goal.CachedPos(row[i]); yGoal == y {
-				res++
-			}
+	for i := x; i < len(row); i++ {
+		if _, goalY := goal.CachedPos(row[i]); goalY == y && i < goalX {
+			res++
 		}
 	}
 	return res
 }
 
-func columnConflicts(x, y int, board [][]int,goal *state.State) int {
+func columnConflicts(goalY, x, y int, board [][]int, goal *state.State) int {
 	res := 0
-	for i := y ; i < len(board); i++ {
-		if i != (y - 1) {
-			if xGoal, _ := goal.CachedPos(board[i][x]); xGoal == x {
-				res++
-			}
+	for i := y; i < len(board); i++ {
+		if goalX, _ := goal.CachedPos(board[i][x]); goalX == x && i < goalY {
+			res++
 		}
 	}
 	return res
@@ -115,14 +110,14 @@ func LinearConflict(a [][]int, b *state.State) int {
 			if tile != 0 && tile != b.Board[y][x] {
 				goalX, goalY := b.CachedPos(tile)
 				if x == goalX {
-					res += columnConflicts(x, y + 1, a, b)
+					res += columnConflicts(goalY, x, y+1, a, b)
 				} else if y == goalY {
-					res += rowConflicts(x + 1, y, row, b)
+					res += rowConflicts(goalX, x+1, y, row, b)
 				}
 			}
 		}
 	}
-	return res
+	return res * 2
 }
 
 func ManhattanXLinear(a [][]int, b *state.State) int {
