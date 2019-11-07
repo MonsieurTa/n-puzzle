@@ -104,6 +104,9 @@ func ParseArgs(data *Data) error {
 	if data.Goal == nil {
 		data.Goal = utils.SnailArray
 	}
+	if data.UniformCost {
+		data.Heuristic = algo.UniformCost
+	}
 	return nil
 }
 

@@ -16,6 +16,10 @@ var Heuristics map[string](func([][]int, *state.State) int) = map[string](func([
 	"conflicts": ManhattanXLinear,
 }
 
+func UniformCost(a [][]int, b *state.State) int {
+	return 0
+}
+
 func Hamming(a [][]int, b *state.State) int {
 	res := 0
 	size := len(b.Board)
