@@ -13,13 +13,12 @@ import (
 
 // Struct containing all n-puzzle data
 type Data struct {
-	Goal        goalFunction
-	Heuristic   heuristic
-	File        *os.File
-	Output      *os.File
-	JsonOutput  bool
-	Greedy      bool
-	UniformCost bool
+	Goal       goalFunction
+	Heuristic  heuristic
+	File       *os.File
+	Output     *os.File
+	JsonOutput bool
+	Greedy     bool
 }
 
 // We store the data here, so that we don't need to pass it to functions anymore
@@ -74,6 +73,7 @@ func ParseArgs(data *Data) error {
 
 	var inputFile string
 	var outputFile string
+	var uniformCost bool
 
 	flag.Var(&data.Heuristic, "heuristic", "an heuristic algorithm between "+getHeuristicNames())
 	flag.Var(&data.Goal, "goal", "a goal between "+getGoalNames())
@@ -81,7 +81,7 @@ func ParseArgs(data *Data) error {
 	flag.StringVar(&outputFile, "o", "", "a file to output in, stdout by default")
 	flag.BoolVar(&data.JsonOutput, "json", false, "output or not to json file")
 	flag.BoolVar(&data.Greedy, "g", false, "greedy mode")
-	flag.BoolVar(&data.UniformCost, "uc", false, "uniform cost")
+	flag.BoolVar(&uniformCost, "uc", false, "uniform cost")
 	flag.Parse()
 
 	if len(inputFile) > 0 {
@@ -104,8 +104,9 @@ func ParseArgs(data *Data) error {
 	if data.Goal == nil {
 		data.Goal = utils.SnailArray
 	}
-	if data.UniformCost {
+	if uniformCost {
 		data.Heuristic = algo.UniformCost
+		data.Greedy = false
 	}
 	return nil
 }
