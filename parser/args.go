@@ -13,12 +13,13 @@ import (
 
 // Struct containing all n-puzzle data
 type Data struct {
-	Goal       goalFunction
-	Heuristic  heuristic
-	File       *os.File
-	Output     *os.File
-	JsonOutput bool
-	Greedy     bool
+	Goal        goalFunction
+	Heuristic   heuristic
+	File        *os.File
+	Output      *os.File
+	JsonOutput  bool
+	Greedy      bool
+	UniformCost bool
 }
 
 // We store the data here, so that we don't need to pass it to functions anymore
@@ -80,6 +81,7 @@ func ParseArgs(data *Data) error {
 	flag.StringVar(&outputFile, "o", "", "a file to output in, stdout by default")
 	flag.BoolVar(&data.JsonOutput, "json", false, "output or not to json file")
 	flag.BoolVar(&data.Greedy, "g", false, "greedy mode")
+	flag.BoolVar(&data.UniformCost, "uc", false, "uniform cost")
 	flag.Parse()
 
 	if len(inputFile) > 0 {
