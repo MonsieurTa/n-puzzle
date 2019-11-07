@@ -74,9 +74,13 @@ func main() {
 	for key, value := range algo.Heuristics {
 		fmt.Fprintf(npuzzle.Output, "- %s: %d\n", strings.Title(key), value(start, goalState))
 	}
+	fmt.Fprint(npuzzle.Output, "\nInitial state:\n")
+	startState.Display(npuzzle.Output)
+	solved := false
 	if gen.IsSolvable(start, goal) {
 		a.AStar(npuzzle.Heuristic, getCost(npuzzle.Greedy))
 		if a.Path != nil {
+			solved = true
 			if npuzzle.JsonOutput {
 				algo.OutputToJson(a.Path, goal)
 			}
@@ -91,7 +95,9 @@ func main() {
 			return
 		}
 	}
-	fmt.Fprint(npuzzle.Output, "This puzzle is unsolvable!\n")
+	if !solved {
+		fmt.Fprint(npuzzle.Output, "\nThis puzzle is unsolvable!\n")
+	}
 
 	npuzzle.File.Close()
 	npuzzle.Output.Close()
