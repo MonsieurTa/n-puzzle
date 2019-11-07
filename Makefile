@@ -1,8 +1,9 @@
 NAME=n-puzzle
+SRC=$(shell find . -name "*.go")
 
 all: $(NAME)
 
-$(NAME):
+$(NAME): $(SRC)
 	go build
 
 re: fclean all
